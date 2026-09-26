@@ -6,3 +6,9 @@ Thumbs.db
 temp/
 .vscode/
 .idea/
+
+# 本地私有内容（不发布）
+*.bak*
+dictionary.base-A.json
+dictionary.*.json
+目录说明与合并方案.md

@@ -8,7 +8,11 @@ appDir = FSO.GetParentFolderName(zhDir)
 exePath = appDir & "\cline-app.exe"
 
 If Not FSO.FileExists(exePath) Then
-    If FSO.FileExists("E:\Program Files\Cline\cline-app.exe") Then
+    If FSO.FileExists("D:\Cline\cline-app.exe") Then
+        exePath = "D:\Cline\cline-app.exe"
+        appDir = "D:\Cline"
+        zhDir = "D:\cline-zh"
+    ElseIf FSO.FileExists("E:\Program Files\Cline\cline-app.exe") Then
         exePath = "E:\Program Files\Cline\cline-app.exe"
         appDir = "E:\Program Files\Cline"
         zhDir = appDir & "\cline-zh"
@@ -57,6 +61,9 @@ If needsLaunch Then
     procEnv("SILENT") = "1"
     procEnv("CDP_PORT") = targetPort
     
+    sidecarPin = zhDir & "\bin\code-sidecar.exe"
+    If FSO.FileExists(sidecarPin) Then procEnv("CLINE_CODE_SIDECAR_BIN") = sidecarPin
+    ' Pinned patched sidecar outside the install dir (survives app updates)
     WshShell.Run """" & exePath & """", 1, False
     WScript.Sleep 1500
 End If
@@ -75,9 +82,12 @@ If Not isNodeRunning Then
     procEnv("SILENT") = "1"
     procEnv("CDP_PORT") = targetPort
     
-    nodeExe = "D:\Program Files\nodejs\node.exe"
+    nodeExe = "C:\Program Files\nodejs\node.exe"
     If Not FSO.FileExists(nodeExe) Then
-        nodeExe = "node"
+        nodeExe = "D:\Program Files\nodejs\node.exe"
+        If Not FSO.FileExists(nodeExe) Then
+            nodeExe = "node"
+        End If
     End If
     WshShell.Run """" & nodeExe & """ """ & injectScript & """", 0, False
 End If

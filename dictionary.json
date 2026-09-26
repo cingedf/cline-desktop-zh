@@ -1,4 +1,5 @@
 {
+  "_note": "Runtime UI localization dictionary for the Cline desktop app. English keys are quoted verbatim from the app UI / public source as lookup keys; Chinese values are original translations of this project or of the MIT-licensed community projects credited in NOTICE. Marketplace catalog texts are excluded.",
   "texts": {
     "Session": "会话",
     "New Session": "新建会话",
@@ -417,70 +418,652 @@
     "Timeout (ms)": "超时时间 (毫秒)",
     "Custom Headers": "自定义请求头",
     "Add Header": "添加请求头",
-    "Saving...": "保存中..."
+    "Saving...": "保存中...",
+    "Customize Cline with plugins, rules, and more": "用插件、规则等为 Cline 扩展定制",
+    "Settings sections": "设置分区",
+    "Remote": "远程",
+    "Account settings": "账户设置",
+    "New": "新建",
+    "Start a new session": "新建会话",
+    "Sidebar actions": "侧边栏操作",
+    "Search sessions": "搜索会话",
+    "Search sessions (Cmd/Ctrl+P)": "搜索会话 (Ctrl+P)",
+    "Sort sessions: Time": "会话排序：时间",
+    "Sort sessions: Project": "会话排序：项目",
+    "Sorted by time — click to group by project": "按时间排序 — 点击改为按项目分组",
+    "Sorted by project — click to group by time": "按项目分组 — 点击改为按时间排序",
+    "Grouped by project — click to sort by time": "按项目分组 — 点击改为按时间排序",
+    "Grouped by time — click to sort by project": "按时间排序 — 点击改为按项目分组",
+    "Projects": "项目分组",
+    "Filter sessions": "筛选会话",
+    "Drag to resize or click to toggle sidebar": "拖动调整宽度，单击收起/展开侧边栏",
+    "Previous page": "后退",
+    "Next page": "前进",
+    "Home": "首页",
+    "Cline home": "Cline 首页",
+    "Agent conversation": "智能体对话",
+    "Notifications (F8)": "通知 (F8)",
+    "Minimize": "最小化",
+    "Maximize": "最大化",
+    "Environment: Local": "环境：本地",
+    "Environment": "环境",
+    "Local": "本地",
+    "Ask to make changes, @mention files, reference #PRs, or run /commands.": "输入需求，或 @提及文件、引用 #PR、运行 /命令。",
+    "Enter your question or type / for commands or @ for context": "输入问题，或键入 / 使用命令、@ 引用上下文",
+    "Search workspaces, or type a folder path": "搜索工作区，或输入文件夹路径",
+    "Search workspaces, or type a folder": "搜索工作区，或输入文件夹路径",
+    "Open folder...": "打开文件夹…",
+    "Open folder": "打开文件夹",
+    "Just chat": "仅聊天",
+    "Workspaces": "工作区",
+    "Project": "项目",
+    "Copy user message": "复制这条提问",
+    "Copy assistant message": "复制这条回复",
+    "Copy message": "复制消息",
+    "Copy raw assistant output": "复制原始回复内容",
+    "Edit user message": "编辑这条提问",
+    "Edit message and restart from this point": "编辑消息并从此处重新开始",
+    "Fork session": "派生会话",
+    "Fork session - copy full message history into a new session": "派生会话 — 将完整消息历史复制到新会话",
+    "Command output": "命令输出",
+    "Output": "输出",
+    "Searched": "已搜索",
+    "Ran command": "已运行命令",
+    "Edited file": "已编辑文件",
+    "Read file": "已读取文件",
+    "Wrote file": "已写入文件",
+    "Listed files": "已列出文件",
+    "Searching": "正在搜索",
+    "Reading": "正在读取",
+    "Running": "进行中",
+    "Thinking": "思考中",
+    "Star": "收藏",
+    "Skill": "技能",
+    "Status": "状态",
+    "Source": "来源",
+    "All": "全部",
+    "All sources": "全部来源",
+    "Desktop": "桌面版",
+    "Task completed notifications": "任务完成通知",
+    "Task completed sound": "任务完成声音",
+    "Approval needed notifications": "需要批准通知",
+    "Approval needed sound": "需要批准声音",
+    "Question asked notifications": "提出问题通知",
+    "Question asked sound": "提出问题声音",
+    "Session error notifications": "会话出错通知",
+    "Session error sound": "会话出错声音",
+    "Pick the icon Cline shows in the": "选择 Cline 在",
+    "Taskbar": "任务栏中显示的图标",
+    "Ready to use with": "可直接使用：",
+    "on models that support it — no extra setup needed.": "（仅限支持该功能的模型，无需额外配置）",
+    "Search provider": "搜索提供商",
+    "Costs": "费用",
+    "Bring your conversation history from other coding tools into Cline. Imported sessions show up in your history and can be continued here.": "把其他编程工具里的对话历史导入 Cline。导入的会话会出现在你的历史中，可在此继续。",
+    "Import sessions": "导入会话",
+    "Remote Environments": "远程环境",
+    "Manage your remote SSH hosts and their configurations.": "管理你的远程 SSH 主机及其配置。",
+    "SSH Hosts": "SSH 主机",
+    "SSH host": "SSH 主机地址",
+    "New Host": "新建主机",
+    "Adding New Host...": "正在添加新主机…",
+    "No SSH hosts yet. Add the address for your first remote environment.": "还没有 SSH 主机。添加你的第一个远程环境地址。",
+    "User (optional)": "用户名（可选）",
+    "Port": "端口",
+    "Identity file (optional)": "密钥文件（可选）",
+    "Password sign-in is not supported. The host key must already be trusted in your SSH known_hosts file.": "不支持密码登录。主机密钥必须已在你的 SSH known_hosts 中被信任。",
+    "Refresh remote environments": "刷新远程环境",
+    "Environment status": "环境状态",
+    "Test Connection": "测试连接",
+    "Connection": "连接",
+    "Connection test": "连接测试",
+    "Inactive": "未启用",
+    "Disconnected": "已断开",
+    "Not tested": "未测试",
+    "Cline setup": "Cline 安装",
+    "Unknown": "未知",
+    "Build server": "构建服务器",
+    "dev.example.com or ssh-config-alias": "dev.example.com 或 SSH 配置别名",
+    "22 (from SSH config by default)": "22（默认取自 SSH 配置）",
+    "overview": "概览",
+    "usage": "用量",
+    "billing": "账单",
+    "Sign Out": "退出登录",
+    "Member since": "加入时间",
+    "Credits Balance": "额度余额",
+    "Credit": "额度",
+    "Organizations": "所属组织",
+    "Active": "生效中",
+    "Open dashboard": "打开控制台",
+    "Search all session history…": "搜索全部会话历史…",
+    "Suggestions": "建议",
+    "Search messages, commands, errors, and file paths.": "搜索消息、命令、错误与文件路径。",
+    "Navigate with ↑↓ and open with ↵": "用 ↑↓ 移动，回车打开",
+    "Monthly": "每月",
+    "Hourly": "每小时",
+    "Spawn a sub-agent with custom instructions for a specialized task. Waits for the sub-agent to finish and returns its result before your next step.": "为专项任务派生一个带自定义指令的子智能体，等它完成并返回结果后再进行下一步。",
+    "Create": "创建",
+    "Remove": "移除",
+    "Open": "打开",
+    "Rename": "重命名",
+    "Run": "运行",
+    "Stop": "停止",
+    "Continue": "继续",
+    "Search": "搜索",
+    "Loading": "加载中",
+    "Enabled": "已启用",
+    "Disabled": "已禁用",
+    "On": "开",
+    "Yes": "是",
+    "No": "否",
+    "Name": "名称",
+    "Messages": "消息",
+    "Permissions": "权限",
+    "Tokens": "令牌数",
+    "Duration": "耗时",
+    "Help": "帮助",
+    "Settings saved": "设置已保存",
+    "No sessions yet": "还没有会话",
+    "Untitled": "无标题",
+    "Pin": "置顶",
+    "Unpin": "取消置顶",
+    "Pinned": "已置顶",
+    "Archive": "归档",
+    "Unarchive": "取消归档",
+    "Archived": "已归档",
+    "Rename session": "重命名会话",
+    "Copy session ID": "复制会话 ID",
+    "Refresh": "刷新",
+    "Connected": "已连接",
+    "Recent": "最近使用",
+    "Favorites": "收藏",
+    "All models": "全部模型",
+    "Custom": "自定义",
+    "Advanced": "高级",
+    "Description": "说明",
+    "Author": "作者",
+    "Install": "安装",
+    "Update": "更新",
+    "Update available": "有可用更新",
+    "No models available": "暂无可用模型",
+    "Loading models…": "正在加载模型…",
+    "Select a provider": "选择提供商",
+    "A curated set of plugins, MCP servers, and skills from the Cline community.": "来自 Cline 社区的插件、MCP 服务器与技能精选集。",
+    "About worktrees": "关于工作树",
+    "Add SSH Host": "添加 SSH 主机",
+    "Anthropic, OpenAI, OpenRouter, and more.": "Anthropic、OpenAI、OpenRouter 等。",
+    "Authorization=Bearer token": "Authorization=Bearer 令牌",
+    "Behind base": "落后于基线分支",
+    "Branch name": "分支名称",
+    "Build software with Cline.": "用 Cline 构建软件",
+    "Cancel rename": "取消重命名",
+    "Checking GitHub connection": "正在检查 GitHub 连接",
+    "Checking for updates...": "正在检查更新…",
+    "Checks failing": "检查未通过",
+    "Choose PNG, JPEG, GIF, or WebP images, or switch to Local to attach other files.": "选择 PNG、JPEG、GIF 或 WebP 图片；其他文件请切换到「本地」。",
+    "Choose a model that supports images or remove the images before sending.": "请选择支持图片的模型，或在发送前移除图片。",
+    "Cline API key": "Cline API 密钥",
+    "Cline has a question": "Cline 有个问题",
+    "Close details": "收起详情",
+    "Close diff view": "关闭差异视图",
+    "Close expanded attachment": "收起展开的附件",
+    "Close image viewer": "关闭图片查看器",
+    "Close menu": "关闭菜单",
+    "Cloud attachment limit": "云端附件数量上限",
+    "Cloud branch": "云端分支",
+    "Cloud repository": "云端代码库",
+    "Cloud session": "云端会话",
+    "Cloud sessions": "云端会话列表",
+    "Command Palette": "命令面板",
+    "Configure a model provider to set up voice input": "先配置一个模型提供商才能设置语音输入",
+    "Connect GitHub": "连接 GitHub",
+    "Connect messaging platforms so you can chat with Cline anywhere. Click on a channel name to view or edit its configuration.": "接入消息平台，随时随地与 Cline 对话。点击频道名称即可查看。",
+    "Copy API key": "复制 API 密钥",
+    "Copy failed": "复制失败",
+    "Copy file path": "复制文件路径",
+    "Could not load more sessions": "无法加载更多会话",
+    "Could not open file": "无法打开文件",
+    "Could not steer queued message": "无法插入排队中的消息",
+    "Delete failed": "删除失败",
+    "Dismiss pull request error": "忽略拉取请求错误",
+    "Enable MCP server": "启用 MCP 服务器",
+    "Expand sidebar": "展开侧边栏",
+    "Expanded attachment": "已展开的附件",
+    "Failed to start run": "启动运行失败",
+    "Filter by title or folder": "按标题或文件夹筛选",
+    "First page": "第一页",
+    "Fork failed": "派生失败",
+    "Go to next page": "下一页",
+    "Go to previous page": "上一页",
+    "Header name": "请求头名称",
+    "Install Model Context Protocol servers into this CLI environment.": "向此 CLI 环境安装 MCP（Model Context Protocol）服务器。",
+    "Install plugins into this CLI environment.": "向此 CLI 环境安装插件。",
+    "Install skills globally for Cline.": "为 Cline 全局安装技能。",
+    "List, create, and update events on your Google Calendar.": "在你的 Google 日历上列出、创建与更新日程。",
+    "Loading connector catalog": "正在加载连接器目录",
+    "Loading connectors": "正在加载连接器",
+    "MCP Server": "MCP 服务器",
+    "MCP servers": "MCP 服务器",
+    "Merge status pending": "合并状态待确认",
+    "My Provider": "我的提供商",
+    "Next generated image": "下一张生成图",
+    "No app update is available to download yet. You can keep working - Cline stays connected to the updated Hub - and try again later.": "暂时没有可下载的应用更新。你仍可继续工作——Cline 会保持与已更新的 Hub 连接——请稍后再试。",
+    "No conflicts": "无冲突",
+    "Open API providers": "打开 API 提供商",
+    "Open GitHub’s comparison form for this branch. Push your commits before submitting.": "打开 GitHub 的分支对比页面。提交前先推送你的 commit。",
+    "Open in editor": "在编辑器中打开",
+    "Open this agent's session": "打开该智能体的会话",
+    "Parent remote directory": "上级远程目录",
+    "Pick your repositories": "选择你的代码库",
+    "Previous generated image": "上一张生成图",
+    "Pull request status": "拉取请求状态",
+    "Read, search, draft, and send email from your Gmail account.": "从你的 Gmail 账户读取、搜索、起草并发送邮件。",
+    "Ready to merge": "可以合并",
+    "Refresh channels": "刷新频道",
+    "Refresh pull request status": "刷新拉取请求状态",
+    "Refresh remote directories": "刷新远程目录",
+    "Remote home directory": "远程主目录",
+    "Remove header": "移除请求头",
+    "Rename failed": "重命名失败",
+    "Restart failed": "重启失败",
+    "Restore checkpoint": "恢复检查点",
+    "Run limits": "运行上限",
+    "Run not started": "运行未启动",
+    "Run started": "运行已启动",
+    "Save title": "保存标题",
+    "Search branches": "搜索分支",
+    "Search branches…": "搜索分支…",
+    "Search channels...": "搜索频道",
+    "Search connectors": "搜索连接器",
+    "Search for a command to run...": "搜索要执行的命令…",
+    "Search marketplace": "搜索市场",
+    "Search repositories…": "搜索代码库…",
+    "Select all sessions": "全选会话",
+    "Select transport": "选择传输方式",
+    "Session history is unavailable right now.": "会话历史暂时不可用。",
+    "Session history": "会话历史",
+    "Sign in to Cline": "登录 Cline",
+    "Sign in with Cline": "使用 Cline 账户登录",
+    "Sort sessions": "会话排序",
+    "Speech input failed": "语音输入失败",
+    "Start a session": "新建会话",
+    "System prompt override": "系统提示词覆盖",
+    "Task failed": "任务失败",
+    "The file path could not be copied to the clipboard.": "文件路径无法复制到剪贴板。",
+    "The message could not be copied to the clipboard.": "该消息无法复制到剪贴板。",
+    "The new version has been downloaded. Restart now, or later from the update button next to the Cline logo.": "新版本已下载完成。可立即重启，或稍后点击 Cline 图标旁的更新按钮。",
+    "The session could not be removed from local history.": "该会话无法从本地历史中移除。",
+    "The update check could not be started. Try again in a moment.": "无法开始更新检查，请稍后重试。",
+    "This model doesn’t support image input": "该模型不支持图片输入",
+    "Unable to check for updates": "无法检查更新",
+    "Unable to open run": "无法打开该运行",
+    "Unsupported cloud attachment": "不支持的云端附件",
+    "Update check failed": "更新检查失败",
+    "Use your own API key": "使用你自己的 API 密钥",
+    "Work with issues, pull requests, and repositories on GitHub.": "在 GitHub 上处理 issue、拉取请求与代码库。",
+    "Working directory": "工作目录",
+    "You're already running the latest version of Cline.": "你已经在运行最新版 Cline。",
+    "You're up to date": "已是最新版本",
+    "Providers": "提供商",
+    "Chats": "对话",
+    "New Task": "新建任务",
+    "New Routine": "新建定时任务",
+    "Built-in Tools": "内置工具",
+    "Routines": "定时任务",
+    "Tasks": "任务",
+    "Extensions": "扩展",
+    "Usage": "用量",
+    "Billing": "账单",
+    "Overview": "概览",
+    "Invite": "邀请",
+    "Team": "团队",
+    "Failed to read changelog": "读取更新日志失败",
+    "Failed to fetch marketplace catalog": "获取应用市场目录失败",
+    "Delete Session?": "删除会话？",
+    "The folder picker could not be opened.": "无法打开文件夹选择器。",
+    "Assignee": "负责人",
+    "Available": "可用",
+    "Expires": "过期时间",
+    "Files": "文件",
+    "Instructions": "指令",
+    "Mode": "模式",
+    "Priority": "优先级",
+    "Review the exact revision before it can start a new agent session.": "启动新的智能体会话前，请先审阅该修订版本。",
+    "Revision": "修订版本",
+    "Scope": "范围",
+    "Type": "类型",
+    "Beta": "测试版",
+    "Loading session history...": "正在加载会话历史…",
+    "No sessions found in history.": "历史记录中没有找到会话。",
+    "Scheduled": "定时任务",
+    "Show more": "显示更多",
+    "Unable to read Cline Hub status.": "无法读取 Cline Hub 状态。",
+    "Click Stop to transcribe your recording.": "点击“停止”以转写你的录音。",
+    "Restarting...": "正在重启…",
+    "The new version has been downloaded and will be used the next time the app starts. Restart now to switch to it right away.": "新版本已下载，将在下次启动应用时生效。立即重启即可马上切换到新版本。",
+    "Cline Hub update required": "需要更新 Cline Hub",
+    "Cline Hub was updated": "Cline Hub 已更新",
+    "Later": "稍后",
+    "Quit Cline": "退出 Cline",
+    "Update Now stops that Hub and interrupts its sessions. Quit Cline closes this app and leaves the Hub running, so you can update later.": "“立即更新”会停止该 Hub 并中断其会话；“退出 Cline”会关闭本应用但保留 Hub 运行，以便稍后更新。",
+    "Updating the Cline Hub failed. Try again, or run 'cline doctor fix' in a terminal.": "更新 Cline Hub 失败。请重试，或在终端中运行 “cline doctor fix”。",
+    "Bring your conversation history from other coding tools into Cline. Imported sessions appear in your history and can be continued here.": "把其他编码工具的对话历史导入 Cline。导入的会话会出现在历史记录中，并可在此继续。",
+    "Cline looks for local history from Claude Code, Codex, and opencode. Nothing importable turned up on this machine.": "Cline 会查找本机 Claude Code、Codex 和 opencode 的本地历史记录。本机未发现可导入的内容。",
+    "Imported": "已导入",
+    "Importing sessions…": "正在导入会话…",
+    "Importing…": "正在导入…",
+    "No sessions found": "未找到会话",
+    "Scanning for sessions…": "正在扫描会话…",
+    "Select all": "全选",
+    "No matching session history.": "没有匹配的会话历史。",
+    "Searching sessions…": "正在搜索会话…",
+    "More": "更多",
+    "Open external link?": "打开外部链接？",
+    "Open link": "打开链接",
+    "You are about to leave Cline and visit this address.": "你即将离开 Cline 并访问此地址。",
+    "More pages": "更多页",
+    "Previous": "上一页",
+    "Displays the mobile sidebar.": "显示移动端侧边栏。",
+    "Sidebar": "侧边栏",
+    "Repository required": "需要代码仓库",
+    "Speech input failed in the webview": "网页视图中语音输入失败",
+    "Switched to browser speech recognition": "已切换到浏览器语音识别",
+    "The voice provider could not be reached. Click the microphone and repeat any missing speech. Browser recognition may also require internet access.": "无法连接语音服务提供商。点击麦克风并补说遗漏的内容。浏览器识别可能还需要联网。",
+    "This model doesn’t support the attached images. Remove them or choose a model that supports images before sending.": "该模型不支持所附图片。请先移除图片，或改用支持图片的模型再发送。",
+    "Updating...": "正在更新…",
+    "Could not fork session.": "无法分叉会话。",
+    "Could not restart from this message.": "无法从此消息重新开始。",
+    "Could not restore checkpoint.": "无法恢复检查点。",
+    "Could not submit answer.": "无法提交回答。",
+    "Could not submit decision.": "无法提交决定。",
+    "Edit and restart from here?": "在此编辑并重新开始？",
+    "Loading session...": "正在加载会话…",
+    "Revert": "还原",
+    "Revert to this checkpoint?": "还原到此检查点？",
+    "Switching session...": "正在切换会话…",
+    "This creates a new session and restores the workspace to its checkpoint before placing this message in the composer. Workspace and conversation changes after this point will be discarded.": "这会新建一个会话，并把工作区恢复到该检查点，然后将此消息放入输入框。此时间点之后的工作区与对话变更都将被丢弃。",
+    "Workspace files and conversation history after this point will be discarded. This cannot be undone.": "此时间点之后的工作区文件和对话历史都将被丢弃，且无法撤销。",
+    "Check your connection and try again.": "请检查网络连接后重试。",
+    "Choose which repositories the Cline GitHub App can access.": "选择 Cline GitHub App 可以访问的代码仓库。",
+    "Cloud sessions are part of your Cline account.": "云端会话属于你的 Cline 账户。",
+    "Cloud sessions run on secure, isolated sandboxes on Cline's infrastructure. Cline clones your repository, works on a branch, and keeps going even when you close the app — check back in from any device.": "云端会话运行在 Cline 基础设施上安全隔离的沙箱中。Cline 会克隆你的仓库、在分支上工作，即使你关闭应用也会继续运行——你可以在任意设备上回来查看。",
+    "Could not reach Cline Cloud": "无法连接 Cline 云端",
+    "Link your GitHub account from the Cline dashboard.": "请在 Cline 控制台中关联你的 GitHub 账户。",
+    "Pick a repo and branch here, describe the task, and Cline gets to work in the cloud.": "在此选择仓库和分支，描述任务，Cline 就会在云端开始工作。",
+    "Watching for changes — this updates automatically.": "正在监视变更——会自动更新。",
+    "No hunk details available.": "没有可用的差异块详情。",
+    "Open in": "打开方式",
+    "System default": "系统默认",
+    "The file could not be opened in an editor.": "无法在编辑器中打开该文件。",
+    "Uncommitted changes": "未提交的更改",
+    "Cloud": "云端",
+    "Coming soon": "即将推出",
+    "Connecting": "正在连接",
+    "No SSH hosts saved": "尚未保存 SSH 主机",
+    "Review each tool call and approve or reject it before execution.": "在执行前审阅每个工具调用并批准或拒绝。",
+    "Tool approval required": "需要批准工具调用",
+    "Could not detach the running command.": "无法分离正在运行的命令。",
+    "Input": "输入",
+    "Could not load pull request status.": "无法加载拉取请求状态。",
+    "Browse directories on the connected SSH host. No local folders are shown here.": "浏览已连接 SSH 主机上的目录。此处不显示本地文件夹。",
+    "Choose remote workspace": "选择远程工作区",
+    "Loading remote directories…": "正在加载远程目录…",
+    "No subdirectories": "没有子目录",
+    "Only the first directories are shown. Open a folder to continue browsing.": "仅显示前几个目录。打开某个文件夹以继续浏览。",
+    "Use this folder": "使用此文件夹",
+    "Cloud sessions run on a secure sandbox, work on a branch, and keep going even when you close the app.": "云端会话运行在安全沙箱中，在分支上工作，即使你关闭应用也会继续运行。",
+    "Connect a model": "连接模型",
+    "Connect a model to start building": "连接模型以开始构建",
+    "Model settings": "模型设置",
+    "Sign in with Cline or add an API key — it takes under a minute.": "使用 Cline 登录或添加 API 密钥——不到一分钟即可完成。",
+    "Connect GitHub to select a repository.": "连接 GitHub 以选择仓库。",
+    "Could not load branches.": "无法加载分支。",
+    "Could not load more branches — Retry": "无法加载更多分支——重试",
+    "Could not load repositories.": "无法加载仓库。",
+    "Loading repositories…": "正在加载仓库…",
+    "No branches found": "未找到分支",
+    "No branches found.": "未找到分支。",
+    "Runs the task on a separate copy of this folder on its own branch, so your files stay untouched until you merge.": "在独立分支上的该文件夹副本中运行任务，因此在你合并之前你的文件保持原样。",
+    "The folder picker could not be opened. Type a folder path above instead.": "无法打开文件夹选择器。请在上方直接输入文件夹路径。",
+    "Worktree": "工作树",
+    "Branches": "分支",
+    "Create and checkout new branch...": "创建并检出新的分支…",
+    "Go": "前往",
+    "The folder picker could not be opened. Type a folder path instead.": "无法打开文件夹选择器。请改为输入文件夹路径。",
+    "Connectors": "连接器",
+    "Environment setup": "环境配置",
+    "Get value": "获取值",
+    "Learn more": "了解更多",
+    "Loading marketplace...": "正在加载应用市场…",
+    "No entries match the current filters.": "没有条目匹配当前的筛选条件。",
+    "Plugin": "插件",
+    "Verified": "已验证",
+    "Add these values to your Cline/plugin environment after install.": "安装后，请把这些值添加到 Cline/插件的环境变量中。",
+    "Checking installed status...": "正在检查安装状态…",
+    "Environment setup needed": "需要配置环境",
+    "Featured": "精选",
+    "Requires setup after install": "安装后需要配置",
+    "Finish installing the Cline GitHub App in your browser...": "请在浏览器中完成 Cline GitHub App 的安装…",
+    "Grant Cline access to your GitHub repositories to supercharge it with real-world context. You can always do this later from your dashboard.": "授予 Cline 访问你 GitHub 仓库的权限，让它结合真实项目上下文。你也可以稍后在控制台中完成。",
+    "Loading repositories...": "正在加载仓库…",
+    "No repositories found. You may need to grant access in your GitHub App settings.": "未找到仓库。你可能需要在 GitHub App 设置中授予访问权限。",
+    "Not connected": "未连接",
+    "Skip for now": "暂时跳过",
+    "Bring your history with you": "带上你的历史记录",
+    "Build software your way": "按你的方式构建软件",
+    "Checking for session history from other tools…": "正在检查其他工具的会话历史…",
+    "Choose how Cline connects to models. You can add more providers anytime in Settings.": "选择 Cline 连接模型的方式。你可以随时在设置中添加更多提供商。",
+    "Choose sessions to import": "选择要导入的会话",
+    "Cline is an AI coding agent. It reads your code, edits files, runs commands, and works through tasks with you — in any project on your machine.": "Cline 是一个 AI 编码智能体。它会阅读你的代码、编辑文件、运行命令，并与你一起完成任务——适用于你机器上的任何项目。",
+    "Find your key": "查找你的密钥",
+    "Free models": "免费模型",
+    "Generous usage across the best open weights models like DeepSeek, Kimi, and GLM.": "在 DeepSeek、Kimi、GLM 等优秀开源权重模型上享有充裕用量。",
+    "Get ClinePass": "获取 ClinePass",
+    "Get started": "开始使用",
+    "Set up Cline": "设置 Cline",
+    "Sign up": "注册",
+    "Skip": "跳过",
+    "Start building": "开始构建",
+    "Takes less than a minute. Everything can be changed later in Settings.": "不到一分钟即可完成。所有内容之后都可以在设置中更改。",
+    "Try with limited usage at no cost.": "免费试用，用量有限。",
+    "Use a Cline API key": "使用 Cline API 密钥",
+    "You're all set": "一切就绪",
+    "Actions": "操作",
+    "Clear filters": "清除筛选",
+    "Fork": "分叉",
+    "Import sessions from Claude Code, Codex, or opencode": "从 Claude Code、Codex 或 opencode 导入会话",
+    "Import sessions from other tools": "从其他工具导入会话",
+    "Newest first": "最新优先",
+    "No filters available": "没有可用的筛选条件",
+    "Oldest first": "最早优先",
+    "Open session:": "打开会话：",
+    "Recent sessions across clients and workspaces.": "跨客户端与工作区的最近会话。",
+    "Title": "标题",
+    "A short tour of the biggest recent additions.": "简要介绍近期最重大的新增功能。",
+    "Found a bug or have a request? Open an issue on GitHub.": "发现 bug 或有需求？请在 GitHub 上提交 issue。",
+    "Full changelog": "完整更新日志",
+    "Highlights": "亮点",
+    "Loading release notes…": "正在加载发布说明…",
+    "Open GitHub issues": "打开 GitHub issues",
+    "Open this release on GitHub": "在 GitHub 上打开此版本",
+    "Release notes": "发布说明",
+    "Report an issue": "反馈问题",
+    "Show what's new": "查看新功能",
+    "Updates": "更新",
+    "Amount": "金额",
+    "Connect your Cline account to review credits, usage, billing, and organization details.": "连接你的 Cline 账户以查看额度、用量、账单和组织信息。",
+    "Create account": "创建账户",
+    "Credits": "额度",
+    "No payment transactions yet.": "暂无支付记录。",
+    "No usage transactions yet.": "暂无用量记录。",
+    "Payment history and credit purchases.": "支付记录与额度购买。",
+    "See More": "查看更多",
+    "Switch": "切换",
+    "Streaming not supported": "不支持流式传输",
+    "Not detected on this machine": "本机未检测到",
+    "Scan failed": "扫描失败",
+    "Scanning…": "正在扫描…",
+    "You're up to date. Cline also checks on its own shortly after launch and every two hours.": "已是最新版本。Cline 还会在启动后不久以及每两小时自动检查一次。",
+    "Update checks are only available in the desktop app.": "更新检查仅在桌面应用中可用。",
+    "Cline checks for updates shortly after launch and every two hours, and installs them when it restarts.": "Cline 会在启动后不久以及每两小时检查更新，并在重启时安装。",
+    "Restart to update": "重启以更新",
+    "Choose a streaming transcription model to use live voice input.": "请选择一个流式转写模型以使用实时语音输入。",
+    "None of your configured providers offer streaming speech-to-text models": "你已配置的提供商都不提供流式语音转文字模型",
+    "Connect a provider with streaming transcription models and this page unlocks automatically.": "连接一个支持流式转写模型的提供商，此页面就会自动解锁。",
+    "Diagnostics exported": "诊断信息已导出",
+    "Export diagnostics": "导出诊断信息",
+    "Saves a text file with app info, recent logs, and the metadata of the sessions you pick. Prompts, conversation contents, and API keys are never included.": "保存一个文本文件，包含应用信息、最近的日志以及你所选会话的元数据。提示词、对话内容和 API 密钥绝不会包含在内。",
+    "Loading sessions…": "正在加载会话…",
+    "No local sessions on this machine yet.": "本机暂无本地会话。",
+    "Personal account": "个人账户",
+    "Recent API usage and token consumption across all providers.": "所有提供商的近期 API 用量与 token 消耗。",
+    "Preview": "预览",
+    "Run Cline on your GitHub repositories in secure cloud sandboxes. Adds a Cloud option to the new-session composer. Requires a Cline account with GitHub connected.": "在安全的云端沙箱中针对你的 GitHub 仓库运行 Cline。会在新建会话输入框中加入“云端”选项。需要已关联 GitHub 的 Cline 账户。",
+    "Diagnostics": "诊断",
+    "Export app info, recent logs, and the metadata of sessions you choose as a file you can attach when reporting a problem.": "导出应用信息、最近的日志，以及你所选会话的元数据，作为反馈问题时可附上的文件。",
+    "Export…": "导出…",
+    "Add MCP Server": "添加 MCP 服务器",
+    "Args": "参数",
+    "Args:": "参数：",
+    "Browse all connectors in the Marketplace": "在应用市场中浏览所有连接器",
+    "CWD:": "工作目录：",
+    "Category": "分类",
+    "Changes to the fields below are saved automatically.": "下方字段的更改会自动保存。",
+    "Cline and portable Agent Plugins discovered by the shared Hub. Changes apply when a session is rebuilt or started.": "共享 Hub 发现的 Cline 与便携式 Agent 插件。更改会在会话重建或启动时生效。",
+    "Command": "命令",
+    "Command:": "命令：",
+    "Commands": "命令",
+    "Configured agents discovered from Documents and settings directories.": "从文档与设置目录中发现的已配置智能体。",
+    "Connect your accounts to give Cline tools for your favorite apps. Tools will become available in new sessions.": "连接你的账户，为 Cline 提供常用应用的工具。工具将在新会话中可用。",
+    "Connection failed": "连接失败",
+    "Connectors aren't available.": "连接器不可用。",
+    "Connects to a hosted server over HTTP by URL.": "通过 URL 以 HTTP 方式连接到托管服务器。",
+    "Copy path": "复制路径",
+    "Could not load agents.": "无法加载智能体。",
+    "Create a new host to change the SSH host, user, or port.": "创建新主机以更改 SSH 主机、用户或端口。",
+    "Current cron expression:": "当前 cron 表达式：",
+    ". Changing the timing controls replaces this expression.": "。更改定时控件将替换此表达式。",
+    "Delegate several tasks in one session and they run at the same time.": "在一个会话中委派多个任务，它们会同时运行。",
+    "Delete MCP Server": "删除 MCP 服务器",
+    "Delete SSH host?": "删除 SSH 主机？",
+    "Disable the server without removing it from settings.": "禁用该服务器，但不会从设置中移除。",
+    "Each task gets its own branch under ~/.cline/worktrees, so parallel work never collides.": "每个任务在 ~/.cline/worktrees 下都有自己的分支，因此并行工作互不冲突。",
+    "Enable this plugin to inspect its dynamic contributions.": "启用该插件以查看其动态贡献。",
+    "Env:": "环境变量：",
+    "Environment variables": "环境变量",
+    "Fri": "周五",
+    "From settings file": "来自设置文件",
+    "Get Started": "开始使用",
+    "Headers": "请求头",
+    "Headers:": "请求头：",
+    "ID:": "ID：",
+    "Invalid configuration": "配置无效",
+    "KEY": "键",
+    "Last error:": "最近错误：",
+    "Last result:": "最近结果：",
+    "Last session:": "最近会话：",
+    "Loading SSH hosts…": "正在加载 SSH 主机…",
+    "Loading channels...": "正在加载渠道…",
+    "MCP settings path:": "MCP 设置路径：",
+    "Metadata JSON": "元数据 JSON",
+    "Model providers": "模型提供商",
+    "Mon": "周一",
+    "No Agent Plugins found.": "未找到 Agent 插件。",
+    "No Cline Plugins found.": "未找到 Cline 插件。",
+    "No configured agents found.": "未找到已配置的智能体。",
+    "No connector channels are available.": "没有可用的连接器渠道。",
+    "No enabled skills or workflows found.": "未找到已启用的技能或工作流。",
+    "No hooks found.": "未找到钩子。",
+    "No plugin contributions found.": "未找到插件贡献。",
+    "No rules found.": "未找到规则。",
+    "No runs yet.": "尚无运行记录。",
+    "OAuth connected": "OAuth 已连接",
+    "Parallel sub-agents": "并行子智能体",
+    "Partial": "部分可用",
+    "Partial results": "部分结果",
+    "Prompt": "提示词",
+    "Remote environment error": "远程环境错误",
+    "Requesting a streaming transcription session": "正在请求流式转写会话",
+    "Restart now": "立即重启",
+    "Restrict access": "限制访问",
+    "Runs a command on this machine (stdio). Recommended when available.": "在本机运行命令（stdio）。可用时推荐使用。",
+    "SSE (legacy)": "SSE（旧版）",
+    "SSH remotes": "SSH 远程",
+    "Sat": "周六",
+    "Search channels": "搜索渠道",
+    "See all changes": "查看全部更新",
+    "Server URL": "服务器 URL",
+    "Server name": "服务器名称",
+    "Server type": "服务器类型",
+    "Slug": "标识名",
+    "Speak instead of typing: the microphone in chat transcribes your voice with the model chosen here. Text appears as you speak; Stop ends the live session.": "用说话代替打字：聊天中的麦克风会用此处选择的模型转写你的语音。你说话时文字会实时出现；点击“停止”结束本次实时会话。",
+    "Streamable HTTP (recommended)": "流式 HTTP（推荐）",
+    "Streaming transcription microphone capture started": "流式转写麦克风采集已开始",
+    "Subscribed": "已订阅",
+    "Sun": "周日",
+    "System prompt (optional)": "系统提示词（可选）",
+    "Tags": "标签",
+    "Tags (comma-separated, optional)": "标签（逗号分隔，可选）",
+    "The app stays on your laptop while Cline works on any machine you can SSH into.": "应用留在你的笔记本上，Cline 则能在任何你可以 SSH 登录的机器上工作。",
+    "The session could not be forked.": "无法分叉该会话。",
+    "The session could not be updated.": "无法更新该会话。",
+    "The session title could not be updated.": "无法更新会话标题。",
+    "Thu": "周四",
+    "Timeout seconds (optional)": "超时秒数（可选）",
+    "Transport": "传输方式",
+    "Tue": "周二",
+    "URL:": "URL：",
+    "Unable to create the task.": "无法创建任务。",
+    "Unable to load Agenda automation.": "无法加载 Agenda 自动化。",
+    "Unable to load the Agenda.": "无法加载 Agenda。",
+    "Unable to update Agenda automation.": "无法更新 Agenda 自动化。",
+    "Unable to update the task.": "无法更新任务。",
+    "VALUE": "值",
+    "View": "查看",
+    "Wed": "周三",
+    "What's new in Cline": "Cline 新功能",
+    "Work anywhere, in parallel": "随处工作，并行推进",
+    "Worktrees": "工作树",
+    "Your branch's PR, merge state, and CI checks, right in the composer.": "在输入框中直接查看分支的 PR、合并状态和 CI 检查。",
+    "available in new sessions": "新会话中可用",
+    "automation,review": "自动化,评审",
+    "Attach images": "添加图片",
+    "Attach files (this model doesn’t support images)": "添加文件（此模型不支持图片）",
+    "Audio-to-text transcription": "音频转文字",
+    "Live audio with streaming updates": "实时音频，流式更新",
+    "Browse": "浏览",
+    "Choose a provider": "选择提供商",
+    "Choose a repository": "选择代码仓库",
+    "Describe what Cline should do in this repository.": "描述你希望 Cline 在此仓库中做什么。",
+    "Restore": "还原",
+    "Search workspaces": "搜索工作区",
+    "Search workspaces & branches": "搜索工作区与分支",
+    "Select a branch": "选择分支",
+    "Select a connected GitHub repository": "选择一个已连接的 GitHub 仓库",
+    "Speech input is not supported in this browser": "此浏览器不支持语音输入",
+    "Stop browser speech recognition": "停止浏览器语音识别",
+    "Record with browser speech recognition": "使用浏览器语音识别录制",
+    "Stop recording": "停止录音",
+    "Record speech": "录制语音",
+    "Thinking level is fixed when a cloud session starts": "云会话启动后，思考级别将固定",
+    "Transcribing voice input…": "正在转写语音输入…",
+    "Using the repository default branch": "使用仓库默认分支",
+    "now": "刚刚",
+    "just now": "刚刚",
+    "Agent is working... submit to queue another message, or Enter to send the first message from the queue": "智能体正在工作中…发送可将下一条消息加入队列，或按 Enter 发送队列中的第一条消息",
+    "Productivity": "生产力",
+    "Marketing": "市场营销",
+    "Research & Docs": "研究与文档",
+    "Data & Analytics": "数据分析",
+    "Software Development": "软件开发",
+    "Business Operations": "业务运营",
+    "Sales": "销售",
+    "Finance": "金融",
+    "Creative & Design": "创意与设计",
+    "Memory & Knowledge": "记忆与知识",
+    "Security": "安全",
+    "Databases": "数据库",
+    "Show less": "收起"
   },
-  "textPatterns": [
-    [
-      "^(\\d+)\\s+configured\\s+[·•\\.]\\s+(\\d+)\\s+available$",
-      "$1 个已配置 · $2 个可用",
-      "i"
-    ],
-    [
-      "^(\\d+)\\s+configured$",
-      "$1 个已配置",
-      "i"
-    ],
-    [
-      "^(\\d+)\\s+available$",
-      "$1 个可用",
-      "i"
-    ],
-    [
-      "^(\\d+)\\s+sessions?$",
-      "$1 个会话",
-      "i"
-    ],
-    [
-      "^(\\d+)\\s+tasks?$",
-      "$1 个任务",
-      "i"
-    ],
-    [
-      "Connect a provider with transcription models\\s+[—–-]\\s+for example\\s+(.+?)\\s+[—–-]\\s+and this page unlocks automatically\\.",
-      "连接包含语音转录模型的提供商（例如 $1），此页面将自动解锁。",
-      "i"
-    ],
-    [
-      "Ready to use with\\s+(.+?)\\s+on models that support it\\s+[—–-]\\s+no extra setup needed\\.",
-      "可与 $1 配合在支持该功能的模型上直接使用 — 无需额外设置。",
-      "i"
-    ],
-    [
-      "No providers match \"([^\"]+)\"\\.",
-      "未找到匹配“$1”的提供商。",
-      "i"
-    ],
-    [
-      "No models match \"([^\"]+)\"\\.",
-      "未找到匹配“$1”的模型。",
-      "i"
-    ],
-    [
-      "Back to the main agent session:\\s*(.*)",
-      "返回主智能体会话：$1",
-      "i"
-    ],
-    [
-      "^BuiltIn Tools\\s*$",
-      "内置工具",
-      "i"
-    ],
-    [
-      "^Plugin Tools\\s*$",
-      "插件工具",
-      "i"
-    ]
-  ],
   "attrs": {
     "Previous page": "上一页",
     "Next page": "下一页",
@@ -577,11 +1160,777 @@
     "Disable all plugin tools": "禁用全部插件工具",
     "Enable all plugin tools": "启用全部插件工具"
   },
+  "wholeElements": {
+    "Search session history": "搜索会话历史",
+    "What would you like to build?": "你想构建什么？"
+  },
+  "textPatterns": [
+    [
+      "^\\+(\\d+) more$",
+      "+$1 项",
+      "i"
+    ],
+    [
+      "^(\\d+)m$",
+      "$1 分钟前",
+      ""
+    ],
+    [
+      "^(\\d+)h$",
+      "$1 小时前",
+      ""
+    ],
+    [
+      "^(\\d+)d$",
+      "$1 天前",
+      ""
+    ],
+    [
+      "^(.*) · (\\d+) already imported$",
+      "$1 · 已导入 $2 个",
+      ""
+    ],
+    [
+      "^Couldn't scan for sessions: (.+)$",
+      "无法扫描会话：$1",
+      ""
+    ],
+    [
+      "^Could not verify voice models for (.+?)\\. Reopen Voice settings to retry\\.$",
+      "无法验证 $1 的语音模型。请重新打开语音设置后重试。",
+      ""
+    ],
+    [
+      "^Could not verify voice models for (.+)\\.$",
+      "无法验证 $1 的语音模型。",
+      ""
+    ],
+    [
+      "^Failed to load providers: (.+)$",
+      "加载提供商失败：$1",
+      ""
+    ],
+    [
+      "^Failed to save voice input settings: (.+)$",
+      "保存语音输入设置失败：$1",
+      ""
+    ],
+    [
+      "^Connect a provider with streaming transcription models — for example (.+) — and this page unlocks automatically\\.$",
+      "连接一个支持流式转写模型的提供商（例如 $1），此页面就会自动解锁。",
+      ""
+    ],
+    [
+      "^Version (.*) is downloaded and will be used the next time Cline starts\\.$",
+      "版本 $1 已下载，将在下次启动 Cline 时使用。",
+      ""
+    ],
+    [
+      "^Downloading version (.*)…$",
+      "正在下载版本 $1…",
+      ""
+    ],
+    [
+      "^The last check failed: (.+)$",
+      "上次检查失败：$1",
+      ""
+    ],
+    [
+      "^Recent API usage and token consumption for (.+)\\.$",
+      "$1 的近期 API 用量与 token 消耗。",
+      ""
+    ],
+    [
+      "^Failed to update CLI auto-update setting: (.+)$",
+      "更新 CLI 自动更新设置失败：$1",
+      ""
+    ],
+    [
+      "^Failed to update cloud sessions setting: (.+)$",
+      "更新云端会话设置失败：$1",
+      ""
+    ],
+    [
+      "^Cloud sessions are currently enabled by the CLINE_CODE_CLOUD_AGENTS environment override, which takes precedence over this setting\\.$",
+      "受环境变量 CLINE_CODE_CLOUD_AGENTS 覆盖影响，云端会话当前为启用状态，该覆盖优先于此设置。",
+      ""
+    ],
+    [
+      "^Cloud sessions are currently disabled by the CLINE_CODE_CLOUD_AGENTS environment override, which takes precedence over this setting\\.$",
+      "受环境变量 CLINE_CODE_CLOUD_AGENTS 覆盖影响，云端会话当前为禁用状态，该覆盖优先于此设置。",
+      ""
+    ],
+    [
+      "^Failed to update telemetry setting: (.+)$",
+      "更新遥测设置失败：$1",
+      ""
+    ],
+    [
+      "^(\\d+)\\s+configured\\s+[·•\\.]\\s+(\\d+)\\s+available$",
+      "$1 个已配置 · $2 个可用",
+      "i"
+    ],
+    [
+      "^(\\d+)\\s+configured$",
+      "$1 个已配置",
+      "i"
+    ],
+    [
+      "^(\\d+)\\s+available$",
+      "$1 个可用",
+      "i"
+    ],
+    [
+      "^(\\d+)\\s+sessions?$",
+      "$1 个会话",
+      "i"
+    ],
+    [
+      "^(\\d+)\\s+tasks?$",
+      "$1 个任务",
+      "i"
+    ],
+    [
+      "Connect a provider with transcription models\\s+[—–-]\\s+for example\\s+(.+?)\\s+[—–-]\\s+and this page unlocks automatically\\.",
+      "连接包含语音转录模型的提供商（例如 $1），此页面将自动解锁。",
+      "i"
+    ],
+    [
+      "Ready to use with\\s+(.+?)\\s+on models that support it\\s+[—–-]\\s+no extra setup needed\\.",
+      "可与 $1 配合在支持该功能的模型上直接使用 — 无需额外设置。",
+      "i"
+    ],
+    [
+      "No providers match \"([^\"]+)\"\\.",
+      "未找到匹配“$1”的提供商。",
+      "i"
+    ],
+    [
+      "No models match \"([^\"]+)\"\\.",
+      "未找到匹配“$1”的模型。",
+      "i"
+    ],
+    [
+      "Back to the main agent session:\\s*(.*)",
+      "返回主智能体会话：$1",
+      "i"
+    ],
+    [
+      "^BuiltIn Tools\\s*$",
+      "内置工具",
+      "i"
+    ],
+    [
+      "^Plugin Tools\\s*$",
+      "插件工具",
+      "i"
+    ],
+    [
+      "^Jan (\\d{1,2}), (\\d{4})$",
+      "$2年1月$1日",
+      ""
+    ],
+    [
+      "^Feb (\\d{1,2}), (\\d{4})$",
+      "$2年2月$1日",
+      ""
+    ],
+    [
+      "^Mar (\\d{1,2}), (\\d{4})$",
+      "$2年3月$1日",
+      ""
+    ],
+    [
+      "^Apr (\\d{1,2}), (\\d{4})$",
+      "$2年4月$1日",
+      ""
+    ],
+    [
+      "^May (\\d{1,2}), (\\d{4})$",
+      "$2年5月$1日",
+      ""
+    ],
+    [
+      "^Jun (\\d{1,2}), (\\d{4})$",
+      "$2年6月$1日",
+      ""
+    ],
+    [
+      "^Jul (\\d{1,2}), (\\d{4})$",
+      "$2年7月$1日",
+      ""
+    ],
+    [
+      "^Aug (\\d{1,2}), (\\d{4})$",
+      "$2年8月$1日",
+      ""
+    ],
+    [
+      "^Sep (\\d{1,2}), (\\d{4})$",
+      "$2年9月$1日",
+      ""
+    ],
+    [
+      "^Oct (\\d{1,2}), (\\d{4})$",
+      "$2年10月$1日",
+      ""
+    ],
+    [
+      "^Nov (\\d{1,2}), (\\d{4})$",
+      "$2年11月$1日",
+      ""
+    ],
+    [
+      "^Dec (\\d{1,2}), (\\d{4})$",
+      "$2年12月$1日",
+      ""
+    ],
+    [
+      "^Thought for (\\d+)m (\\d+)s$",
+      "思考了 $1 分 $2 秒",
+      ""
+    ],
+    [
+      "^Thought for (\\d+)s$",
+      "思考了 $1 秒",
+      ""
+    ],
+    [
+      "^Worked for (.+?) and made (\\d+) tool calls?$",
+      "用时 $1，共 $2 次工具调用",
+      ""
+    ],
+    [
+      "^Worked for (.+?)$",
+      "用时 $1",
+      ""
+    ],
+    [
+      "^Explored (\\d+) links?$",
+      "已浏览 $1 个链接",
+      ""
+    ],
+    [
+      "^Explored (\\d+) files?$",
+      "已查看 $1 个文件",
+      ""
+    ],
+    [
+      "^(\\d+) sessions? found$",
+      "找到 $1 个会话",
+      ""
+    ],
+    [
+      "^(\\d+) configured · (\\d+) available$",
+      "已配置 $1 个 · 可用 $2 个",
+      ""
+    ],
+    [
+      "^Open diff: (\\d+) additions, (\\d+) deletions$",
+      "查看改动：+$1 −$2",
+      ""
+    ],
+    [
+      "^Copy model ID (.+)$",
+      "复制模型 ID $1",
+      ""
+    ],
+    [
+      "^Searched (.+)$",
+      "已搜索 $1",
+      ""
+    ],
+    [
+      "^Used (\\d+) tools?$",
+      "使用了 $1 个工具",
+      ""
+    ],
+    [
+      "^Model: (.+)$",
+      "模型：$1",
+      ""
+    ],
+    [
+      "^Provider: (.+)$",
+      "提供商：$1",
+      ""
+    ],
+    [
+      "^Sort sessions: (.+)$",
+      "会话排序：$1",
+      ""
+    ],
+    [
+      "^Environment: (.+)$",
+      "环境：$1",
+      ""
+    ],
+    [
+      "^Toggle (.+)$",
+      "开关：$1",
+      ""
+    ],
+    [
+      "^Favorite (.+)$",
+      "收藏 $1",
+      ""
+    ]
+  ],
   "attrPatterns": [
+    [
+      "^Model: (.+)$",
+      "模型：$1",
+      "i"
+    ],
+    [
+      "^Provider: (.+)$",
+      "提供商：$1",
+      "i"
+    ],
+    [
+      "^Import \"(.+)\"$",
+      "导入“$1”",
+      "i"
+    ],
+    [
+      "^Provider / (.+)$",
+      "提供商 / $1",
+      "i"
+    ],
+    [
+      "^Select all (.+) sessions$",
+      "全选 $1 会话",
+      "i"
+    ],
     [
       "^Copy model ID (.*)$",
       "复制模型 ID $1",
       "i"
+    ],
+    [
+      "^Copy (.+)$",
+      "复制 $1",
+      "i"
+    ],
+    [
+      "^Open diff:\\s*(\\d+)\\s*additions,\\s*(\\d+)\\s*deletions$",
+      "查看变更：+$1 -$2",
+      "i"
+    ],
+    [
+      "^Open (.+) in editor$",
+      "在编辑器中打开 $1",
+      "i"
+    ],
+    [
+      "^Expand attachment (.+)$",
+      "展开附件 $1",
+      "i"
+    ],
+    [
+      "^Expand generated image (.+)$",
+      "展开生成的图片 $1",
+      "i"
+    ],
+    [
+      "^Expand (.+)$",
+      "展开 $1",
+      "i"
+    ],
+    [
+      "^Collapse (.+)$",
+      "收起 $1",
+      "i"
+    ],
+    [
+      "^Attachment (.+)$",
+      "附件 $1",
+      "i"
+    ],
+    [
+      "^Generated result (.+)$",
+      "生成结果 $1",
+      "i"
+    ],
+    [
+      "^Delete (.+)$",
+      "删除 $1",
+      "i"
+    ],
+    [
+      "^Edit (.+)$",
+      "编辑 $1",
+      "i"
+    ],
+    [
+      "^Enable (.+)$",
+      "启用 $1",
+      "i"
+    ],
+    [
+      "^Rename (.+)$",
+      "重命名 $1",
+      "i"
+    ],
+    [
+      "^Remove env var row$",
+      "移除该环境变量",
+      "i"
+    ],
+    [
+      "^Remove env var (.+)$",
+      "移除环境变量 $1",
+      "i"
+    ],
+    [
+      "^Remove (.+)$",
+      "移除 $1",
+      "i"
+    ],
+    [
+      "^Run (.+) now$",
+      "立即运行 $1",
+      "i"
+    ],
+    [
+      "^Filter by (.+)$",
+      "按 $1 筛选",
+      "i"
+    ],
+    [
+      "^Search MCP Servers$",
+      "搜索 MCP 服务器",
+      "i"
+    ],
+    [
+      "^Search Skills$",
+      "搜索技能",
+      "i"
+    ],
+    [
+      "^Search Plugins$",
+      "搜索插件",
+      "i"
+    ],
+    [
+      "^Search Marketplace$",
+      "搜索市场",
+      "i"
+    ],
+    [
+      "^Search workspaces & branches$",
+      "搜索工作区与分支",
+      "i"
+    ],
+    [
+      "^Search workspaces, or type a folder path$",
+      "搜索工作区，或输入文件夹路径",
+      "i"
+    ],
+    [
+      "^Search workspaces$",
+      "搜索工作区",
+      "i"
+    ],
+    [
+      "^Search (.+)$",
+      "搜索 $1",
+      "i"
+    ],
+    [
+      "^Select all (.+) sessions$",
+      "全选 $1 个会话",
+      "i"
+    ],
+    [
+      "^Session actions for (.+)$",
+      "$1 的会话操作",
+      "i"
+    ],
+    [
+      "^More actions for plugin$",
+      "插件的更多操作",
+      "i"
+    ],
+    [
+      "^More actions for (.+)$",
+      "$1 的更多操作",
+      "i"
+    ],
+    [
+      "^Toggle (.+)$",
+      "切换 $1",
+      "i"
+    ],
+    [
+      "^Sort sessions: Time$",
+      "会话排序：时间",
+      "i"
+    ],
+    [
+      "^Sort sessions: Project$",
+      "会话排序：项目",
+      "i"
+    ],
+    [
+      "^Page (\\d+)$",
+      "第 $1 页",
+      "i"
+    ],
+    [
+      "^Environment: (.+)$",
+      "环境：$1",
+      "i"
+    ],
+    [
+      "^Task completed notifications$",
+      "任务完成通知",
+      "i"
+    ],
+    [
+      "^Task completed sound$",
+      "任务完成提示音",
+      "i"
+    ],
+    [
+      "^Approval needed notifications$",
+      "需要批准通知",
+      "i"
+    ],
+    [
+      "^Approval needed sound$",
+      "需要批准提示音",
+      "i"
+    ],
+    [
+      "^Question asked notifications$",
+      "提问通知",
+      "i"
+    ],
+    [
+      "^Question asked sound$",
+      "提问提示音",
+      "i"
+    ],
+    [
+      "^Session error notifications$",
+      "会话错误通知",
+      "i"
+    ],
+    [
+      "^Session error sound$",
+      "会话错误提示音",
+      "i"
+    ],
+    [
+      "^(.+) connection$",
+      "$1 连接",
+      "i"
+    ],
+    [
+      "^Hide (.+)$",
+      "隐藏 $1",
+      "i"
+    ],
+    [
+      "^Show (.+)$",
+      "显示 $1",
+      "i"
+    ],
+    [
+      "^Update ready: v(.+)$",
+      "更新已就绪：v$1",
+      "i"
+    ],
+    [
+      "^(.+) — beta builds install side by side with the stable app and update from the beta channel$",
+      "$1 — 测试版与稳定版并行安装，并从测试版通道更新",
+      "i"
+    ],
+    [
+      "^Provider / Model$",
+      "提供商 / 模型",
+      "i"
+    ],
+    [
+      "^(.+) / Model$",
+      "$1 / 模型",
+      "i"
+    ],
+    [
+      "^Transcribe live with (.+) / (.+)$",
+      "使用 $1 / $2 实时转写",
+      "i"
+    ],
+    [
+      "^Using the repository default branch: (.+)$",
+      "使用仓库默认分支：$1",
+      "i"
+    ],
+    [
+      "^Using the repository default branch$",
+      "使用仓库默认分支",
+      "i"
+    ],
+    [
+      "^(\\d+) agents?$",
+      "$1 个智能体",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running$",
+      "$1 个智能体：$2 运行中",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) completed$",
+      "$1 个智能体：$2 已完成",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) completed$",
+      "$1 个智能体：$2 运行中，$3 已完成",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) failed$",
+      "$1 个智能体：$2 失败",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) failed$",
+      "$1 个智能体：$2 运行中，$3 失败",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) completed, (\\d+) failed$",
+      "$1 个智能体：$2 已完成，$3 失败",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) completed, (\\d+) failed$",
+      "$1 个智能体：$2 运行中，$3 已完成，$4 失败",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) cancelled$",
+      "$1 个智能体：$2 已取消",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) cancelled$",
+      "$1 个智能体：$2 运行中，$3 已取消",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) completed, (\\d+) cancelled$",
+      "$1 个智能体：$2 已完成，$3 已取消",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) completed, (\\d+) cancelled$",
+      "$1 个智能体：$2 运行中，$3 已完成，$4 已取消",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) failed, (\\d+) cancelled$",
+      "$1 个智能体：$2 失败，$3 已取消",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) failed, (\\d+) cancelled$",
+      "$1 个智能体：$2 运行中，$3 失败，$4 已取消",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) completed, (\\d+) failed, (\\d+) cancelled$",
+      "$1 个智能体：$2 已完成，$3 失败，$4 已取消",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) completed, (\\d+) failed, (\\d+) cancelled$",
+      "$1 个智能体：$2 运行中，$3 已完成，$4 失败，$5 已取消",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 运行中，$3 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) completed, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 已完成，$3 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) completed, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 运行中，$3 已完成，$4 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) failed, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 失败，$3 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) failed, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 运行中，$3 失败，$4 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) completed, (\\d+) failed, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 已完成，$3 失败，$4 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) completed, (\\d+) failed, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 运行中，$3 已完成，$4 失败，$5 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) cancelled, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 已取消，$3 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) cancelled, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 运行中，$3 已取消，$4 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) completed, (\\d+) cancelled, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 已完成，$3 已取消，$4 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) completed, (\\d+) cancelled, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 运行中，$3 已完成，$4 已取消，$5 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) failed, (\\d+) cancelled, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 失败，$3 已取消，$4 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) failed, (\\d+) cancelled, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 运行中，$3 失败，$4 已取消，$5 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) completed, (\\d+) failed, (\\d+) cancelled, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 已完成，$3 失败，$4 已取消，$5 无记录结果",
+      ""
+    ],
+    [
+      "^(\\d+) agents?: (\\d+) running, (\\d+) completed, (\\d+) failed, (\\d+) cancelled, (\\d+) with no recorded outcome$",
+      "$1 个智能体：$2 运行中，$3 已完成，$4 失败，$5 已取消，$6 无记录结果",
+      ""
     ],
     [
       "^Favorite (.*)$",
@@ -594,18 +1943,9 @@
       "i"
     ],
     [
-      "^Open diff:\\s*(\\d+)\\s*additions,\\s*(\\d+)\\s*deletions$",
-      "查看变更：+$1 -$2",
-      "i"
-    ],
-    [
       "^Back to the main agent session:\\s*(.*)$",
       "返回主智能体会话：$1",
       "i"
     ]
-  ],
-  "wholeElements": {
-    "Search session history": "搜索会话历史",
-    "What would you like to build?": "你想构建什么？"
-  }
+  ]
 }

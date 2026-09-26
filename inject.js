@@ -212,7 +212,9 @@ async function loop() {
         }
       }
       if (missingCount >= 5 && lastLog > 0) {
-        cleanupSidecar();
+        // Safety: only clean orphaned sidecar when Cline is really gone;
+        // if Cline runs without a debug port, exit quietly and leave sidecar intact.
+        if (!isClineAppRunning()) { cleanupSidecar(); }
         process.exit(0);
       }
     }
