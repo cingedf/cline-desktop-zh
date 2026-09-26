@@ -30,8 +30,14 @@ function cleanupSidecar() {
   } catch (e) {}
 }
 
+function loadDict() {
+  // 读取词典时去除可能存在的 UTF-8 BOM，避免 JSON.parse 报错
+  const raw = fs.readFileSync(DICT_PATH, 'utf8').replace(/^\uFEFF/, '');
+  return JSON.parse(raw);
+}
+
 function buildPayload() {
-  const DICT = JSON.parse(fs.readFileSync(DICT_PATH, 'utf8'));
+  const DICT = loadDict();
   return "(() => {" +
     "const DICT = " + JSON.stringify(DICT) + ";" +
     "const textRes = (DICT.textPatterns || []).map(([p, r, f]) => [new RegExp(p, f), r]);" +
@@ -189,7 +195,16 @@ async function loop() {
   let lastLog = 0;
   let missingCount = 0;
   while (true) {
-    const payload = buildPayload();
+    let payload;
+    try {
+      payload = buildPayload();
+    } catch (e) {
+      // 词典被改坏（JSON 语法错误等）时不让注入器退出：提示并每 3 秒重试，
+      // 用户修正 dictionary.json 后自动恢复热重载。
+      if (!process.env.SILENT) console.error('[cline-zh] dictionary.json 解析失败，3 秒后重试：' + e.message);
+      await new Promise(r => setTimeout(r, 3000));
+      continue;
+    }
     const targets = await getTargets();
     const page = targets.find(t => t.type === 'page');
     if (page && page.webSocketDebuggerUrl) {
