@@ -35,12 +35,14 @@ cline-zh/
 ├── dictionary.json                 # 汉化词典 (texts / attrs / wholeElements / textPatterns / attrPatterns)
 ├── inject.js                       # 基于 WebView2 CDP 的核心注入器 (Node.js)
 ├── launch-silent.vbs               # 静默启动器 (无黑框、防多开、自动拉起、孤儿进程清理)
+├── 一键升级并汉化.cmd                # 【双击】官方升级后一键恢复汉化 + 重打 sidecar 补丁
+├── upgrade-cline-zh.ps1            # 上面这个 .cmd 的实际脚本（11 步全自动，路径自动探测）
 ├── 启动 Cline 中文版.cmd            # 调试运行脚本 (显示控制台输出，便于排查)
 ├── 停止后台汉化.cmd                 # 一键结束后台注入器进程
 ├── LICENSE                         # MIT 许可证 (含上游版权声明)
 ├── NOTICE                          # 来源、许可与合规声明
 ├── THIRD-PARTY-LICENSES.md         # 上游项目 MIT 许可全文
-├── bin\                            # （可选，需自行新建）无 AVX2 老 CPU：放入重编译的 code-sidecar.exe
+├── bin\                            # （可选，由脚本生成）无 AVX2 老 CPU：重编译的 code-sidecar.exe
 └── .gitignore
 ```
 
@@ -75,27 +77,72 @@ cline-zh/
 
 ---
 
-## 🧩 可选：无 AVX2 老 CPU 的 sidecar 兼容
+## 🧩 无 AVX2 老 CPU：sidecar 兼容（可选）
 
-部分老 CPU（Pentium Gold、部分 Nehalem / Westmere / Whiskey Lake 等）不支持 AVX2 指令集，官方 `code-sidecar.exe` 启动即崩溃，界面因此无法使用。若你属于这种情况，按以下三步操作：
+部分老 CPU（Pentium Gold、部分 Nehalem / Westmere / Whiskey Lake 等）不支持 AVX2 指令集。官方 `code-sidecar.exe` 使用 Bun 的标准 x64 构建，在这些 CPU 上启动即崩溃，界面因此无法使用。
 
-1. 用姊妹项目 [cline-sidecar-preavx2-fix](https://github.com/cingedf/cline-sidecar-preavx2-fix) 中的一键脚本 `repatch-cline-sidecar.ps1`，在本机重编译出一个可用的 `code-sidecar.exe`（该仓库 README 有完整步骤与参数说明）。
-2. 在 `cline-zh` 文件夹内**手工新建一个 `bin` 子文件夹**（本仓库不附带任何二进制，需你自行生成）。
-3. 把第 1 步得到的 `code-sidecar.exe` 复制进去，最终路径为：
+**如果你不确定自己是否受影响**：直接双击 `一键升级并汉化.cmd`，第 1 步会用 .NET 权威 API 检测你的 CPU；不支持时会自动继续执行补丁流程。
 
-   ```text
-   <你的 Cline 安装目录>\cline-zh\bin\code-sidecar.exe
+### 前提准备（仅需一次）
+
+补丁需要用 [Bun](https://bun.sh/) 从官方源码重编译 sidecar，请先准备好：
+
+1. 安装 [Bun](https://bun.sh/)（1.4.x）
+2. 浅克隆官方源码（体积很大，建议放在空间充足的盘）：
+   ```powershell
+   git clone --depth 1 https://github.com/cline/cline.git
    ```
+3. 把 `cline-zh` 放在 Cline 安装目录下（与 `cline-app.exe` 同级），例如 `C:\Program Files\Cline\cline-zh`
 
-启动器每次启动都会检查这个文件：**存在**时自动通过 `CLINE_CODE_SIDECAR_BIN` 环境变量固定使用该副本（不修改官方安装目录，官方更新后依然生效）；**不存在**时按官方原版运行，一切照旧。
+### 使用
+
+双击 `一键升级并汉化.cmd`，脚本会自动完成 11 步：
+
+| 步骤 | 动作 |
+| --- | --- |
+| 0~1 | 前置检查；检测 CPU 是否需要 AVX2 补丁 |
+| 2 | **考证官方该版本是否已把 Windows sidecar 改为 baseline 构建**（决定还要不要编译） |
+| 3 | 检出对应 tag，并核对源码版本号 == 已安装版本号（避免界面版本号错位） |
+| 4~6 | `bun install` → `build:sdk` → 编译 sidecar |
+| 7 | 关闭 Cline、备份旧 sidecar、替换 + 同步 `bin\code-sidecar.exe` |
+| 8~10 | 通过中文版启动器重启，验证存活 / 无崩溃循环 / 两侧哈希一致 / 界面确为中文 |
+| 11 | 清理临时文件与陈旧备份 |
+
+脚本会自动探测安装目录、Bun 与源码位置；非标准路径时可用参数覆盖：
+
+```powershell
+.\upgrade-cline-zh.ps1 -ClineDir "X:\Apps\Cline" -RepoDir "X:\src\cline" -ForcePatch
+```
+
+> 生成固定副本后，启动器每次启动都会检查 `cline-zh\bin\code-sidecar.exe`：**存在**时通过 `CLINE_CODE_SIDECAR_BIN` 固定使用该副本（不修改官方安装目录，官方更新后依然生效）；**不存在**时按官方原版运行。
+>
+> 官方目前 Windows 侧仍用标准构建（仅 Linux 用 baseline），相关 PR 尚未合入；脚本每次都会重新考证，一旦官方修复将自动跳过编译。
 
 ---
 
 ## ❓ 常见问题 (FAQ)
 
 ### Q: Cline 客户端更新后汉化会失效吗？
-
 **不会失效**。本补丁采用独立的外部挂载与运行时注入设计，官方安装包更新时仅覆盖自身程序文件，不会影响 `cline-zh` 目录与桌面快捷方式。
+
+### Q: 官方更新后需要做什么？
+**双击 `一键升级并汉化.cmd`** 即可（11 步全自动，详见上文「无 AVX2 老 CPU：sidecar 兼容」）。
+
+- 汉化词典与注入器本身不受官方更新影响，通常无需任何操作；
+- 但**无 AVX2 老 CPU** 需要在更新后重新打一次 sidecar 补丁（官方更新会覆盖安装目录里的补丁），运行该脚本即可；
+- 脚本还会核对**界面版本号与已安装版本是否一致**——若不一致会明确提示（界面版本号取自源码 `tauri.conf.json`，源码 tag 错位会导致显示旧版本号）。
+
+### Q: 界面还是英文，汉化没生效？
+**先确认启动方式**：必须从「Cline 中文版」快捷方式（或 `wscript launch-silent.vbs`）启动。
+直接双击 `cline-app.exe` 会得到原版英文界面——因为汉化依赖启动参数 `--remote-debugging-port=19333`，原版入口不带该参数。
+
+```powershell
+# 注入器是否在跑（应有输出）
+Get-CimInstance Win32_Process -Filter "Name='node.exe'" |
+  Where-Object { $_.CommandLine -like "*cline-zh\inject.js*" } | Select-Object ProcessId
+# 调试端口是否可达（应返回版本 JSON）
+Invoke-WebRequest "http://127.0.0.1:19333/json/version" -UseBasicParsing | Select-Object -ExpandProperty Content
+```
 
 ### Q: 想补充 / 修改词条怎么办？
 
@@ -113,7 +160,7 @@ cline-zh/
 
 ### Q: 如何彻底卸载？
 
-删除 `cline-zh` 文件夹和桌面快捷方式即可。本补丁不修改官方程序文件，官方 Cline 可继续正常使用。注意：如曾为无 AVX2 老 CPU 在 `cline-zh\bin\` 放置过重编译的 sidecar，删除该文件夹后官方版仍会回到"sidecar 无法启动"的状态（可重新运行一次姊妹项目的重打脚本）。
+删除 `cline-zh` 文件夹和桌面快捷方式即可。本补丁不修改官方程序文件，官方 Cline 可继续正常使用。注意：如曾为无 AVX2 老 CPU 在 `cline-zh\bin\` 放置过重编译的 sidecar，删除该文件夹后官方版会回到"sidecar 无法启动"的状态（可重新运行一次 `一键升级并汉化.cmd` 重新生成）。
 
 ---
 
