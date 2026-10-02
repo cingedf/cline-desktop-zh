@@ -7,8 +7,19 @@ temp/
 .vscode/
 .idea/
 
+# 编译产物与二进制（由 upgrade-cline-zh.ps1 生成，体积上百 MB）
+bin/
+*.exe
+
 # 本地私有内容（不发布）
 *.bak*
+*.pregit
+*.orig
+*.rej
 dictionary.base-A.json
 dictionary.*.json
 目录说明与合并方案.md
+
+# 本机专用配置（含代理地址与用户路径）
+launch-silent.local.vbs
+local-config.json

@@ -1,0 +1,19 @@
+# 统一行尾，避免跨平台 diff 噪声与脚本行为差异。
+# 这些文件在 Windows 上运行，保持 CRLF；
+# dictionary.json / *.json 保持 LF（最小化体积，避免 JSON 解析差异）。
+
+* text=auto
+
+*.json  text eol=lf
+*.md    text eol=lf
+*.js    text eol=lf
+
+*.ps1   text eol=crlf
+*.cmd   text eol=crlf
+*.vbs   text eol=crlf
+
+# 二进制，禁止行尾转换
+*.exe   binary
+*.png   binary
+*.ico   binary
+*.zip   binary

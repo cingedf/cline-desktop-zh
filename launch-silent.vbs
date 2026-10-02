@@ -61,6 +61,25 @@ If needsLaunch Then
     procEnv("SILENT") = "1"
     procEnv("CDP_PORT") = targetPort
     
+    ' Outbound proxy for Connectors (Telegram/Slack/...): those pollers must
+    ' reach api.telegram.org and other overseas endpoints, which time out
+    ' without a proxy. The bundled Bun runtime honors http_proxy/https_proxy/no_proxy.
+    ' FlClash exposes mixed-port 7897, which accepts BOTH HTTP and SOCKS5.
+    ' Cline CLI only supports HTTP proxies, so use the http:// scheme here.
+    ' no_proxy MUST exempt the local hub (127.0.0.1:25463), otherwise the
+    ' connector process cannot reach the Cline Hub and fails to start.
+    ' NOTE: keep this comment block ASCII-only. This .vbs has no BOM and is
+    ' decoded as ANSI, so multi-byte characters can corrupt line breaks.
+    proxyBase = "http://127.0.0.1:7897"
+    If proxyBase <> "" Then
+        procEnv("HTTP_PROXY") = proxyBase
+        procEnv("http_proxy") = proxyBase
+        procEnv("HTTPS_PROXY") = proxyBase
+        procEnv("https_proxy") = proxyBase
+        procEnv("NO_PROXY") = "127.0.0.1,localhost,::1"
+        procEnv("no_proxy") = "127.0.0.1,localhost,::1"
+    End If
+    
     sidecarPin = zhDir & "\bin\code-sidecar.exe"
     If FSO.FileExists(sidecarPin) Then procEnv("CLINE_CODE_SIDECAR_BIN") = sidecarPin
     ' Pinned patched sidecar outside the install dir (survives app updates)

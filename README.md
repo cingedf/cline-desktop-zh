@@ -4,7 +4,7 @@
 
 专为 Cline 桌面客户端（Tauri + WebView2 架构）打造，具备 **零侵入二进制、防官方更新失效、无黑框后台静默运行、随软件退出自动回收** 等核心特性。
 
-> **本项目是 [JACK5920/cline-desktop-zh](https://github.com/JACK5920/cline-desktop-zh) 的延续分支（Fork）**：在其 418 条词典的基础上继续扩充与维护，当前规模为 **文本 1062 条 + 属性 94 条 + 文本模式 62 条 + 属性模式 94 条**（共 1300+ 条匹配规则）。
+> **本项目是 [JACK5920/cline-desktop-zh](https://github.com/JACK5920/cline-desktop-zh) 的延续分支（Fork）**：在其 418 条词典的基础上继续扩充与维护，当前规模为 **文本 1608 条 + 属性 94 条 + 文本模式 62 条 + 属性模式 94 条**（共 1700+ 条匹配规则）。
 > 上游以 MIT 许可发布，本分支同样以 MIT 许可发布并保留上游版权声明。来源与署名详见 [NOTICE](NOTICE) 与 [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md)。
 
 ---
@@ -35,8 +35,9 @@ cline-zh/
 ├── dictionary.json                 # 汉化词典 (texts / attrs / wholeElements / textPatterns / attrPatterns)
 ├── inject.js                       # 基于 WebView2 CDP 的核心注入器 (Node.js)
 ├── launch-silent.vbs               # 静默启动器 (无黑框、防多开、自动拉起、孤儿进程清理)
-├── 一键升级并汉化.cmd                # 【双击】官方升级后一键恢复汉化 + 重打 sidecar 补丁
-├── upgrade-cline-zh.ps1            # 上面这个 .cmd 的实际脚本（11 步全自动，路径自动探测）
+├── 官方更新后-重新汉化.cmd         # 【双击】官方更新【之后】重新汉化 + 重打 sidecar 补丁
+│                                     #   注意：本脚本【不负责升级 Cline 本体】
+├── upgrade-cline-zh.ps1            # 上面这个 .cmd 的实际脚本（13 步全自动，路径自动探测）
 ├── 启动 Cline 中文版.cmd            # 调试运行脚本 (显示控制台输出，便于排查)
 ├── 停止后台汉化.cmd                 # 一键结束后台注入器进程
 ├── LICENSE                         # MIT 许可证 (含上游版权声明)
@@ -81,7 +82,7 @@ cline-zh/
 
 部分老 CPU（Pentium Gold、部分 Nehalem / Westmere / Whiskey Lake 等）不支持 AVX2 指令集。官方 `code-sidecar.exe` 使用 Bun 的标准 x64 构建，在这些 CPU 上启动即崩溃，界面因此无法使用。
 
-**如果你不确定自己是否受影响**：直接双击 `一键升级并汉化.cmd`，第 1 步会用 .NET 权威 API 检测你的 CPU；不支持时会自动继续执行补丁流程。
+**如果你不确定自己是否受影响**：直接双击 `官方更新后-重新汉化.cmd`，第 1 步会用 .NET 权威 API 检测你的 CPU；不支持时会自动继续执行补丁流程。
 
 ### 前提准备（仅需一次）
 
@@ -96,17 +97,26 @@ cline-zh/
 
 ### 使用
 
-双击 `一键升级并汉化.cmd`，脚本会自动完成 11 步：
+> ⚠️ **本脚本【不升级 Cline 本体】**，请先在 Cline 界面里完成官方更新，再运行本脚本。
+> 两步之间**不要直接运行 `cline-app.exe`**——官方未打补丁的 Windows sidecar
+> 在无 AVX2 的 CPU 上无法运行。
+>
+> ⚠️ 前提：Cline 设置里的**自动更新必须保持关闭**，否则可能在脚本运行途中
+> 自行更新造成 app / sidecar 版本错位。脚本第 0 步会检查，未关闭直接中止。
+
+双击 `官方更新后-重新汉化.cmd`，脚本会自动完成 13 步：
 
 | 步骤 | 动作 |
 | --- | --- |
-| 0~1 | 前置检查；检测 CPU 是否需要 AVX2 补丁 |
+| 0 | 前置检查：**自动更新守卫** / 从启动器导入代理 / connector 快照 |
+| 0~1 | 检测 CPU 是否需要 AVX2 补丁 |
 | 2 | **考证官方该版本是否已把 Windows sidecar 改为 baseline 构建**（决定还要不要编译） |
 | 3 | 检出对应 tag，并核对源码版本号 == 已安装版本号（避免界面版本号错位） |
 | 4~6 | `bun install` → `build:sdk` → 编译 sidecar |
-| 7 | 关闭 Cline、备份旧 sidecar、替换 + 同步 `bin\code-sidecar.exe` |
+| 7 | 关闭 Cline（含 connector 进程）、备份旧 sidecar、替换 + 同步 `bin\code-sidecar.exe` |
 | 8~10 | 通过中文版启动器重启，验证存活 / 无崩溃循环 / 两侧哈希一致 / 界面确为中文 |
-| 11 | 清理临时文件与陈旧备份 |
+| 11 | **验证 Telegram connector 是否随 sidecar 重启自动恢复** |
+| 12 | 清理临时文件与陈旧备份 |
 
 脚本会自动探测安装目录、Bun 与源码位置；非标准路径时可用参数覆盖：
 
@@ -126,7 +136,7 @@ cline-zh/
 **不会失效**。本补丁采用独立的外部挂载与运行时注入设计，官方安装包更新时仅覆盖自身程序文件，不会影响 `cline-zh` 目录与桌面快捷方式。
 
 ### Q: 官方更新后需要做什么？
-**双击 `一键升级并汉化.cmd`** 即可（11 步全自动，详见上文「无 AVX2 老 CPU：sidecar 兼容」）。
+**双击 `官方更新后-重新汉化.cmd`** 即可（13 步全自动，详见上文「无 AVX2 老 CPU：sidecar 兼容」）。
 
 - 汉化词典与注入器本身不受官方更新影响，通常无需任何操作；
 - 但**无 AVX2 老 CPU** 需要在更新后重新打一次 sidecar 补丁（官方更新会覆盖安装目录里的补丁），运行该脚本即可；
@@ -160,7 +170,7 @@ Invoke-WebRequest "http://127.0.0.1:19333/json/version" -UseBasicParsing | Selec
 
 ### Q: 如何彻底卸载？
 
-删除 `cline-zh` 文件夹和桌面快捷方式即可。本补丁不修改官方程序文件，官方 Cline 可继续正常使用。注意：如曾为无 AVX2 老 CPU 在 `cline-zh\bin\` 放置过重编译的 sidecar，删除该文件夹后官方版会回到"sidecar 无法启动"的状态（可重新运行一次 `一键升级并汉化.cmd` 重新生成）。
+删除 `cline-zh` 文件夹和桌面快捷方式即可。本补丁不修改官方程序文件，官方 Cline 可继续正常使用。注意：如曾为无 AVX2 老 CPU 在 `cline-zh\bin\` 放置过重编译的 sidecar，删除该文件夹后官方版会回到"sidecar 无法启动"的状态（可重新运行一次 `官方更新后-重新汉化.cmd` 重新生成）。
 
 ---
 
