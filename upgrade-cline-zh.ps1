@@ -42,7 +42,12 @@ param(
     [string]$Launcher  = "",
     [string]$NodeExe   = "",
     [string]$Tag       = "",
-    [switch]$ForcePatch
+    [switch]$ForcePatch,
+    # app 与源码版本不一致时，默认**中止**而不是警告后继续。
+    # 理由：错位产出的补丁版 sidecar 会被 launch-silent.vbs 钉在 bin\ 里长期使用，
+    # 界面版本号与实际后端对不上，排查成本远高于等 tag 同步。
+    # 仅在确认官方 tag 命名与安装版本号确实不同步、且你清楚后果时才加此开关。
+    [switch]$AllowVersionMismatch
 )
 
 # ---------- 自动探测 ----------
@@ -246,8 +251,52 @@ function Get-ActiveConnector {
     return $res
 }
 
+# ---------- Git 残留锁预检 ----------
+# 背景（2026-10-03 实际踩到）：本仓库是 --depth 1 浅克隆，git 在
+# fetch/checkout 途中被中断（代理切换 / Ctrl+C / 关机）会留下
+# .git\shallow.lock 或 .git\index.lock。此后**所有** git fetch 都直接
+# exit=128 "Unable to create ... File exists"，tag 拉不下来。
+#
+# 之所以难以定位：脚本原先把 fetch 输出 `| Out-Null` 吞掉了，只留一句
+# 「仓库中没有 tag xxx（官方可能改了命名）」，看起来像是"官网拉不到 /
+# 无法验证 AVX2"，实际是本地锁文件挡住了，官方仓库一切正常。
+#
+# 这里在联网之前先自愈：仅在确认没有 git 进程运行时才把锁改名备份
+# （不删除，保留现场），再继续后面的 fetch。
+function Clear-StaleGitLocks {
+    param([string]$Dir)
+    $gitDir = Join-Path $Dir ".git"
+    if (-not (Test-Path $gitDir)) { return }
+
+    # 只扫 .git 顶层：git 的锁文件（shallow.lock / index.lock / HEAD.lock /
+    # config.lock / packed-refs.lock）全部生成在 .git 根目录，
+    # 递归扫 objects 会白跑上万个文件。
+    $locks = @(Get-ChildItem $gitDir -Filter "*.lock" -File -Force -ErrorAction SilentlyContinue)
+    if ($locks.Count -eq 0) { return }
+
+    $running = @(Get-CimInstance Win32_Process -Filter "Name='git.exe'" -ErrorAction SilentlyContinue)
+    if ($running.Count -gt 0) {
+        Warn ("检测到 {0} 个 git 锁文件，但仍有 git.exe 在运行（pid {1}）。" -f $locks.Count, (($running.ProcessId) -join ','))
+        Warn "为避免破坏进行中的 git 操作，本脚本不自动清理。请先关闭其它 git 程序再重跑。"
+        Die "存在活动中的 git 进程，源码仓库状态不确定，已中止。"
+    }
+
+    $stamp = (Get-Date -Format 'yyyyMMdd-HHmmss')
+    foreach ($l in $locks) {
+        $bakName = "$($l.Name).stale-$stamp"
+        try {
+            Rename-Item -LiteralPath $l.FullName -NewName $bakName -Force -ErrorAction Stop
+            Ok ("已备份残留 git 锁：{0} -> {1}" -f $l.Name, $bakName)
+        } catch {
+            Warn ("无法处理 git 锁 {0}：{1}" -f $l.Name, $_.Exception.Message)
+            Warn "若 fetch 仍报 File exists，请手动删除该锁文件后重跑。"
+        }
+    }
+}
+
 # ---------- 0. 前置检查 ----------
 Step "0/12 前置检查"
+Clear-StaleGitLocks -Dir $RepoDir
 $appExe = Join-Path $ClineDir "cline-app.exe"
 if (-not (Test-Path $appExe))       { Die "找不到 Cline 安装目录下的 cline-app.exe。请用 -ClineDir 指定安装目录（当前探测值：'$ClineDir'）" }
 if (-not (Test-Path $BunExe))        { Die "找不到 Bun（编译补丁版 sidecar 必需）。请安装 Bun 或用 -BunExe 指定路径（当前探测值：'$BunExe'）" }
@@ -295,6 +344,47 @@ $version = (Get-Item $appExe).VersionInfo.FileVersion.Trim()
 if (-not $Tag) { $Tag = "desktop-v" + $version }
 $bunVer = (Invoke-Native -FilePath $BunExe -Arguments @("--version") -Capture).Output.Trim()
 Say "安装版本 = $version，目标 tag = $Tag，Bun = $bunVer"
+
+# ---- 固定副本是否落后于当前 app ----
+# sidecar 的 FileVersion 是 bun 版本（1.4.x），跟 app 版本无关，
+# 所以「汉化版是不是最新的」以前只能靠记时间戳去猜。
+# 现在读第 7 步写的构建清单，直接给出结论。
+$mfPath = Join-Path $PinnedDir "build-manifest.json"
+if (Test-Path $mfPath) {
+    try {
+        $mf = [System.IO.File]::ReadAllText($mfPath, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
+        if ($mf.appVersion -eq $version) {
+            Ok "固定副本对应当前版本 $($mf.appVersion)（构建于 $($mf.builtAt)，$($mf.tag)）"
+        } else {
+            Warn "固定副本是对应 **$($mf.appVersion)** 编译的（$($mf.builtAt)，$($mf.tag)），当前 app 已是 **$version**"
+            Say "本次会重新编译 $Tag 源码并替换它"
+        }
+    } catch {
+        Warn "build-manifest.json 解析失败，跳过固定副本版本检查"
+    }
+} else {
+    Say "尚无构建清单（首次运行本脚本时会生成）"
+}
+
+# ---- 两侧 sidecar 是否已错位（上次升级半途失败的痕迹）----
+# 2026-10-03 实测踩到：第 7 步先替换安装目录、再替换固定副本，
+# 结果固定副本被 sidecar 进程占用而抛异常，安装目录已是新版、固定副本还是旧的，
+# 而启动器只钉固定副本 —— 两侧从此分叉，且没有任何提示。
+$sidecarInst = Join-Path $ClineDir "code-sidecar.exe"
+$sidecarPin  = Join-Path $PinnedDir  "code-sidecar.exe"
+if ((Test-Path $sidecarInst) -and (Test-Path $sidecarPin)) {
+    $hI = (Get-FileHash $sidecarInst -Algorithm SHA256).Hash
+    $hP = (Get-FileHash $sidecarPin  -Algorithm SHA256).Hash
+    if ($hI -eq $hP) {
+        Ok "两侧 sidecar 一致（$($hI.Substring(0,16))…）"
+    } else {
+        Warn "两侧 sidecar 不一致 —— 上次升级很可能在半途失败了"
+        Warn "  安装目录 = $($hI.Substring(0,16))…"
+        Warn "  固定副本 = $($hP.Substring(0,16))…"
+        Say "启动器只钉固定副本，所以实际生效的是旧的那份。本脚本会在第 7 步把两侧对齐。"
+    }
+}
+
 Ok "前置检查通过"
 
 # ---------- 1. CPU 是否需要补丁 ----------
@@ -319,14 +409,35 @@ try {
 Step "2/12 考证官方是否已把 Windows sidecar 改为 baseline 构建"
 Push-Location $RepoDir
 try {
-    Invoke-Native -FilePath "git" -Arguments @("fetch","--depth","1","origin","+refs/tags/$($Tag):refs/tags/$($Tag)") | Out-Null
+    # fetch 的输出必须保留：这是"拉不到 tag"唯一的诊断线索。
+    # 原先 `| Out-Null` 把 fatal: ... 整段吞掉，只剩一句"官方可能改了命名"，
+    # 排查时完全看不出是真网络问题还是本地锁文件。
+    $fetch = Invoke-Native -FilePath "git" -Arguments @("fetch","--depth","1","origin","+refs/tags/$($Tag):refs/tags/$($Tag)") -Capture
+    if ($fetch.ExitCode -ne 0) {
+        Say "git fetch 原始输出："
+        Write-Host ($fetch.Output.Trim()) -ForegroundColor DarkGray
+        Die ("从 GitHub 拉取 tag $Tag 失败（git exit={0}）。常见原因与对策：" -f $fetch.ExitCode) +
+            "`n       - 报 File exists / Unable to create .git\*.lock -> 残留锁，删掉对应锁文件后重跑" +
+            "`n       - 报 unable to access / Connection timed out   -> 代理不通，检查 git config http.proxy（本机应为 127.0.0.1:7897）" +
+            "`n       - 报 could not resolve host                    -> DNS/网络问题"
+    }
     $rcTag = Invoke-Native -FilePath "git" -Arguments @("rev-parse","--verify","--quiet","refs/tags/$($Tag)")
     if ($rcTag -ne 0) {
-        Warn "仓库中没有 tag $Tag（官方可能改了命名）；仍会尝试用当前工作区构建"
+        # 已 fetch 成功却仍找不到 tag，才是真正的"官方改了命名"
+        Warn "已成功联网 fetch，但仓库中仍没有 tag $Tag（官方可能改了命名）；仍会尝试用当前工作区构建"
     } else {
-        $bs  = Invoke-Native -FilePath "git" -Arguments @("show","desktop-v0.0.40:apps/examples/desktop-app/scripts/build-sidecar-bin.ts") -Capture
         $cur = Invoke-Native -FilePath "git" -Arguments @("show","$($Tag):apps/examples/desktop-app/scripts/build-sidecar-bin.ts") -Capture
-        $winLine = ($cur.Output | Select-String -Pattern 'x86_64-pc-windows' | Select-Object -First 1)
+        if ($cur.ExitCode -ne 0) {
+            Warn "已拉到 tag $Tag，但读不出 build-sidecar-bin.ts（exit=$($cur.ExitCode)）；路径可能变了，按需要补丁处理"
+            $winLine = $null
+        } else {
+            # Invoke-Native -Capture 返回的是整个文件的多行文本。
+            # 直接喂给 Select-String，它会把整份文件当成「一行」，
+            # 于是 $winLine.ToString() 吐出整个 build-sidecar-bin.ts（几百行刷屏）。
+            # 必须先按行切开再匹配。
+            $curLines = $cur.Output -split "`r?`n"
+            $winLine = ($curLines | Select-String -Pattern 'x86_64-pc-windows' | Select-Object -First 1)
+        }
         if ($winLine -and $winLine.ToString() -match 'bun-windows-x64-baseline') {
             Ok "官方该版本 Windows sidecar 已用 baseline 构建 -> 本机无需补丁"
             $needPatch = $false
@@ -357,7 +468,21 @@ try {
     $repoVer = (Select-String -Path (Join-Path $RepoDir "apps\examples\desktop-app\src-tauri\tauri.conf.json") -Pattern '"version"\s*:\s*"([^"]+)"').Matches[0].Groups[1].Value
     Say "源码已切到 $Tag（tauri.conf.json version = $repoVer）"
     if ($repoVer -ne $version) {
-        Warn "源码版本号($repoVer) 与安装版本($version) 不一致，界面会显示 $repoVer"
+        # 【2026-10-03】原来是 Warn 然后继续 —— 这是脚本里最危险的一处：
+        # 错位产物会被 launch-silent.vbs 钉在 bin\ 里长期使用，用户看到的却是
+        # "app 显示 0.0.44、后端其实是 0.0.43 源码编的"，极难自行发现。
+        # 现在默认中止，等 tag 与安装版本同步后重跑即可。
+        if ($AllowVersionMismatch) {
+            Warn "源码版本号($repoVer) 与安装版本($version) 不一致，但指定了 -AllowVersionMismatch，继续执行"
+            Warn "结果：界面会显示 $repoVer，且 app 与 sidecar 版本错位"
+        } else {
+            Die ("源码版本($repoVer) 与安装版本($version) 不一致，已中止。`n" +
+                 "       含义：tag $Tag 检出的源码并不是当前 app 对应的那一版。`n" +
+                 "       常见原因：`n" +
+                 "         - tag 存在但内容尚未同步（官方发版早于 tag 推送）——等几分钟重跑`n" +
+                 "         - 你手动改了 -Tag —— 去掉它让脚本按 app 版本自动推导`n" +
+                 "       若你确认后果可接受，可加 -AllowVersionMismatch 强制继续。")
+        }
     } else {
         Ok "源码版本与安装版本一致（$repoVer），界面版本号不会错位"
     }
@@ -409,6 +534,66 @@ if ($newVer -ne $bunVer) { Die "产物版本 $newVer 与 bun $bunVer 不一致�
 if ($newLen -lt 100MB)   { Die "产物小于 100MB，疑似不完整，已中止" }
 Ok "编译产物校验通过"
 
+# ---------- 替换 sidecar 的可靠性辅助 ----------
+# 【2026-10-03 实测事故】原本这里是「Stop-Process -> Start-Sleep 3 -> 直接 File.Copy」，
+# 结果安装目录替换成功、固定副本替换直接抛未捕获异常：
+#   IOException: The process cannot access the file
+#   'D:\cline-zh\bin\code-sidecar.exe' because it is being used by another process.
+# 异常绕过了 $script:Failed 收尾，构建清单没写、后续步骤全没跑。
+#
+# 两个原因叠加：
+#   1) code-sidecar 同时有两个进程（桌面后端 + --cline-hub-daemon），
+#      强杀后 Windows 释放文件句柄有延迟，固定 3 秒不够；
+#   2) hub-daemon 会从同一个 binary 重新 exec 自己，被拉起的还是 bin 里的那个，
+#      杀完又出现新 PID（实测 7732/8008 -> 6836/1084）。
+# 所以改成：循环杀 + 等待真正消失 + 带重试的复制 + 失败时点名占用者。
+
+function Stop-ClineTree {
+    $deadline = (Get-Date).AddSeconds(40)
+    $round = 0
+    while ((Get-Date) -lt $deadline) {
+        $round++
+        $procs = @(Get-Process -Name cline-app, code-sidecar -ErrorAction SilentlyContinue)
+        if ($procs.Count -eq 0) { return @{ Cleared = $true; Rounds = $round } }
+        foreach ($p in $procs) {
+            Say ("仍在运行 {0} pid={1}，强制结束（第 {2} 轮）" -f $p.ProcessName, $p.Id, $round)
+            Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+        }
+        Start-Sleep -Seconds 2
+    }
+    $left = @(Get-Process -Name cline-app, code-sidecar -ErrorAction SilentlyContinue)
+    return @{ Cleared = ($left.Count -eq 0); Rounds = $round; Remaining = $left }
+}
+
+function Copy-SidecarWithRetry {
+    param([string]$From, [string]$To, [int]$MaxTries = 6)
+    $lastErr = ""
+    for ($i = 1; $i -le $MaxTries; $i++) {
+        try {
+            [System.IO.File]::Copy($From, $To, $true)
+            return @{ Ok = $true; Tries = $i }
+        } catch {
+            $lastErr = $_.Exception.Message
+            if ($i -lt $MaxTries) {
+                Warn ("复制失败（第 {0}/{1} 次），{2}s 后重试：{3}" -f $i, $MaxTries, (2 * $i), $lastErr)
+                Start-Sleep -Seconds (2 * $i)
+            }
+        }
+    }
+    # 走到这里说明真占着 —— 把占用者点名，比只报 "used by another process" 有用得多
+    $holders = @()
+    try {
+        $holders = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
+                     Where-Object { $_.ExecutablePath -and ($_.ExecutablePath -ieq $To) })
+    } catch { }
+    $detail = if ($holders.Count -gt 0) {
+        ($holders | ForEach-Object { "pid=$($_.ProcessId) [$($_.Name)]" }) -join ", "
+    } else {
+        "未发现残留占用进程，应为文件句柄释放延迟"
+    }
+    return @{ Ok = $false; Tries = $MaxTries; Error = $lastErr; Detail = $detail }
+}
+
 # ---------- 7. 关闭进程 / 备份 / 替换 ----------
 Step "7/12 关闭 Cline、备份并替换 sidecar"
 Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue |
@@ -424,28 +609,84 @@ Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyCon
         Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
         Ok "已停止 connector 进程 pid=$($_.ProcessId) ($pname)"
     }
-Get-Process -Name cline-app  -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }
-Get-Process -Name code-sidecar -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }
-Start-Sleep -Seconds 3
+$kill = Stop-ClineTree
+if ($kill.Cleared) {
+    Ok "Cline 与 sidecar 进程已全部退出（$($kill.Rounds) 轮）"
+} else {
+    $names = ($kill.Remaining | ForEach-Object { "$($_.ProcessName)/$($_.Id)" }) -join ", "
+    Die "40 秒后仍有进程存活：$names`n       这些进程正在占用 sidecar，无法替换。请手动结束它们后重跑。"
+}
 
 $target = Join-Path $ClineDir "code-sidecar.exe"
+$targetSha8 = $null
 if (Test-Path $target) {
     # 备份名不能用 FileVersion：官方版与补丁版的 FileVersion 都是 1.4.x，
     # 会导致 "备份已存在，跳过" 而永远存不下真正的旧版本。
     # 改用「安装版本 + 内容哈希前 8 位」，每个二进制唯一。
-    $sha8 = (Get-FileHash $target -Algorithm SHA256).Hash.Substring(0,8)
-    $bak = Join-Path $ClineDir ("code-sidecar.exe.bak-" + $version + "-" + $sha8)
+    $targetSha8 = (Get-FileHash $target -Algorithm SHA256).Hash.Substring(0,8)
+    $bak = Join-Path $ClineDir ("code-sidecar.exe.bak-" + $version + "-" + $targetSha8)
     if (Test-Path $bak) { Warn "备份已存在，跳过：$(Split-Path $bak -Leaf)" }
     else { [System.IO.File]::Copy($target, $bak, $true); Ok "旧 sidecar 已备份 -> $(Split-Path $bak -Leaf)" }
 }
-[System.IO.File]::Copy($repoSidecar, $target, $true)
+
+# 【顺序很关键】先更新固定副本（bin\），再更新安装目录。
+# 反过来的话，一旦 bin 被占用而失败，安装目录已经是新版、bin 还是旧版，
+# 启动器又只钉 bin —— 直接落进 app/sidecar 版本错位状态。
+# 现在这个顺序下，bin 失败则安装目录保持原样，两侧依旧一致，不会错位。
+if ($PinnedDir) {
+    [System.IO.Directory]::CreateDirectory($PinnedDir) | Out-Null
+    $pinned = Join-Path $PinnedDir "code-sidecar.exe"
+    $rPin = Copy-SidecarWithRetry -From $repoSidecar -To $pinned
+    if (-not $rPin.Ok) {
+        Die ("更新固定副本失败（重试 $($rPin.Tries) 次）：$($rPin.Error)`n" +
+             "       占用者：$($rPin.Detail)`n" +
+             "       安装目录**未改动**，两侧仍一致，不会错位。请结束后重跑本脚本。")
+    }
+    if ($rPin.Tries -gt 1) { Say "固定副本在第 $($rPin.Tries) 次尝试才成功（文件曾被占用）" }
+    Ok "已更新固定副本 $pinned"
+}
+
+$rTgt = Copy-SidecarWithRetry -From $repoSidecar -To $target
+if (-not $rTgt.Ok) {
+    Die ("替换安装目录 sidecar 失败（重试 $($rTgt.Tries) 次）：$($rTgt.Error)`n" +
+         "       占用者：$($rTgt.Detail)`n" +
+         "       注意：固定副本已更新为新版，但安装目录仍是旧版，app/sidecar 会错位。`n" +
+         "       请结束后重跑本脚本让两侧重新对齐。")
+}
 Ok "已替换 $target"
+
+# 两侧必须完全一致，否则启动器钉的 bin 与安装目录会分叉
+if ($PinnedDir) {
+    $hA = (Get-FileHash $target          -Algorithm SHA256).Hash
+    $hB = (Get-FileHash $pinned          -Algorithm SHA256).Hash
+    if ($hA -eq $hB) { Ok "两侧哈希一致（$($hA.Substring(0,16))…），不会错位" }
+    else { Die "安装目录($($hA.Substring(0,16))) 与固定副本($($hB.Substring(0,16))) 哈希不一致，请重跑" }
+}
 
 if ($PinnedDir) {
     [System.IO.Directory]::CreateDirectory($PinnedDir) | Out-Null
     $pinned = Join-Path $PinnedDir "code-sidecar.exe"
     [System.IO.File]::Copy($repoSidecar, $pinned, $true)
     Ok "已更新固定副本 $pinned"
+
+    # 写构建清单：把「这份补丁版到底对应哪个 app 版本」变成机器可读的事实。
+    # 起因：sidecar 的 FileVersion 是 bun 版本（1.4.x），与 app 版本无关，
+    # 光看 exe 无法判断它是 0.0.42 还是 0.0.43 编的 —— 只能靠猜。
+    # 有了清单，下次跑脚本时能直接比对，也方便你随时确认汉化版是否最新。
+    $commit = (git -C $RepoDir rev-parse HEAD 2>$null | Select-Object -First 1)
+    $manifest = [ordered]@{
+        appVersion    = $version
+        tag           = $Tag
+        commit        = $commit
+        bunVersion    = $bunVer
+        sha256        = (Get-FileHash $repoSidecar -Algorithm SHA256).Hash
+        sizeBytes     = (Get-Item $repoSidecar).Length
+        builtAt       = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
+        buildTarget   = "bun-windows-x64"
+    }
+    $mfPath = Join-Path $PinnedDir "build-manifest.json"
+    [System.IO.File]::WriteAllText($mfPath, ($manifest | ConvertTo-Json -Depth 4), (New-Object System.Text.UTF8Encoding $false))
+    Ok "已写入构建清单 $mfPath"
 }
 }
 
