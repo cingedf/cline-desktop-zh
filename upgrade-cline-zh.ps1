@@ -189,10 +189,21 @@ function Get-ClineCmd {
 # 否则 connector 进程无法访问 api.telegram.org。
 function Import-ProxyEnvFromLauncher {
     param([string]$LauncherPath)
-    if (-not $LauncherPath -or -not (Test-Path $LauncherPath)) { return $null }
-    $m = Select-String -Path $LauncherPath -Pattern 'proxyBase\s*=\s*"([^"]+)"' -ErrorAction SilentlyContinue
-    if (-not $m -or -not $m.Matches[0].Groups[1].Value) { return $null }
-    $pb = $m.Matches[0].Groups[1].Value.Trim()
+    if (-not $LauncherPath) { return $null }
+    # 代理地址属于本机配置：启动器里只留占位，真实值在 gitignore 的
+    # launch-silent.local.vbs（其中仅赋值 proxyBase）。两处都读，后者优先。
+    $pb = ""
+    $cands = @($LauncherPath)
+    $localCfg = Join-Path (Split-Path -Parent $LauncherPath) "launch-silent.local.vbs"
+    if ($localCfg) { $cands += $localCfg }
+    foreach ($cfgPath in $cands) {
+        if (-not (Test-Path $cfgPath)) { continue }
+        $m = Select-String -Path $cfgPath -Pattern 'proxyBase\s*=\s*"([^"]+)"' -ErrorAction SilentlyContinue
+        if ($m -and $m.Matches.Count -gt 0 -and $m.Matches[0].Groups[1].Value) {
+            $pb = $m.Matches[0].Groups[1].Value.Trim()
+            if ($pb) { break }
+        }
+    }
     if (-not $pb) { return $null }
     $env:HTTP_PROXY  = $pb
     $env:HTTPS_PROXY = $pb
@@ -354,7 +365,7 @@ if (Test-Path $gsPath) {
 
 # ---- 代理环境：从启动器导入，供本脚本后续拉起 connector 使用 ----
 $pb = Import-ProxyEnvFromLauncher -LauncherPath $Launcher
-if ($pb) { Ok "已从 launch-silent.vbs 载入出站代理：$pb" }
+if ($pb) { Ok "已从启动器/本地覆盖文件载入出站代理：$pb" }
 else { Warn "未能从 launch-silent.vbs 解析代理；若 connector 需出网，自动恢复可能失败" }
 
 # ---- connector 快照（升级前它们在跑，升级过程会打断）----
@@ -895,7 +906,7 @@ Start-Sleep -Seconds 30
 $still = Get-Process -Id $mainPid -ErrorAction SilentlyContinue
 if (-not $still)           { Die "sidecar 已退出，疑似崩溃循环" }
 if ($still.StartTime -ne $start1) { Die "sidecar 被重启，疑似崩溃循环" }
-Ok "sidecar 30 秒内 PID 稳定，无崩溃循环"
+Ok "后端 30 秒内 PID 稳定，无崩溃循环"
 
 # ---------- 10. 验证哈希与汉化 ----------
 Step "10/12 验证：哈希一致 + 汉化生效"

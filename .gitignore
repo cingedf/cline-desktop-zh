@@ -23,3 +23,13 @@ dictionary.*.json
 # 本机专用配置（含代理地址与用户路径）
 launch-silent.local.vbs
 local-config.json
+# 凭据与本地数据（防止误提交）
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.p12
+*.db
+*.sqlite
+*.sqlite3

@@ -64,13 +64,18 @@ If needsLaunch Then
     ' Outbound proxy for Connectors (Telegram/Slack/...): those pollers must
     ' reach api.telegram.org and other overseas endpoints, which time out
     ' without a proxy. The bundled Bun runtime honors http_proxy/https_proxy/no_proxy.
-    ' FlClash exposes mixed-port 7897, which accepts BOTH HTTP and SOCKS5.
-    ' Cline CLI only supports HTTP proxies, so use the http:// scheme here.
+    ' The proxy address is machine-specific, so it lives in the gitignored
+    ' launch-silent.local.vbs, which only assigns proxyBase.
+    ' That proxy must speak HTTP (Cline CLI does not support SOCKS5 schemes).
     ' no_proxy MUST exempt the local hub (127.0.0.1:25463), otherwise the
     ' connector process cannot reach the Cline Hub and fails to start.
     ' NOTE: keep this comment block ASCII-only. This .vbs has no BOM and is
     ' decoded as ANSI, so multi-byte characters can corrupt line breaks.
-    proxyBase = "http://127.0.0.1:7897"
+    proxyBase = ""
+    localCfg = zhDir & "\launch-silent.local.vbs"
+    If FSO.FileExists(localCfg) Then
+        ExecuteGlobal FSO.OpenTextFile(localCfg, 1).ReadAll()
+    End If
     If proxyBase <> "" Then
         procEnv("HTTP_PROXY") = proxyBase
         procEnv("http_proxy") = proxyBase
