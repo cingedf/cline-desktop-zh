@@ -1724,6 +1724,36 @@
   },
   "textPatterns": [
     [
+      "^The run failed:\\s*fetch failed$",
+      "运行失败：网络请求失败",
+      ""
+    ],
+    [
+      "^The run failed:\\s*The socket connection was closed unexpectedly\\. For more information, pass verbose: true in the second argument to fetch\\(\\)$",
+      "运行失败：套接字连接意外关闭。更多信息请在 fetch() 的第二个参数中传入 verbose: true",
+      ""
+    ],
+    [
+      "^For more information, pass verbose: true in the second argument to fetch\\(\\)$",
+      "更多信息请在 fetch() 的第二个参数中传入 verbose: true",
+      ""
+    ],
+    [
+      "^fetch failed$",
+      "网络请求失败",
+      ""
+    ],
+    [
+      "^Request timed out$",
+      "请求超时",
+      "i"
+    ],
+    [
+      "^Aborted$",
+      "已中止",
+      "i"
+    ],
+    [
       "^\\+(\\d+) more$",
       "+$1 项",
       "i"
@@ -2031,6 +2061,66 @@
     [
       "^Favorite (.+)$",
       "收藏 $1",
+      ""
+    ],
+    [
+      "^The socket connection was closed unexpectedly\\.?$",
+      "套接字连接意外关闭。",
+      ""
+    ],
+    [
+      "^The socket connection was closed unexpectedly\\.? For more information, pass verbose: true in the second argument to fetch\\(\\)$",
+      "套接字连接意外关闭。更多信息请在 fetch() 的第二个参数中传入 verbose: true",
+      ""
+    ],
+    [
+      "^The operation was aborted\\.?$",
+      "操作已中止。",
+      ""
+    ],
+    [
+      "^Operation timed out\\.?$",
+      "操作超时。",
+      ""
+    ],
+    [
+      "^The run failed:\\s*",
+      "运行失败：",
+      ""
+    ],
+    [
+      "^The request failed:\\s*",
+      "请求失败：",
+      ""
+    ],
+    [
+      "^Request failed:\\s*",
+      "请求失败：",
+      ""
+    ],
+    [
+      "^Error:\\s*",
+      "错误：",
+      ""
+    ],
+    [
+      "^Failed:\\s*",
+      "失败：",
+      ""
+    ],
+    [
+      "^Network Error.*$",
+      "网络错误",
+      "i"
+    ],
+    [
+      "^Connection (?:refused|reset|closed).*$",
+      "连接被拒绝或中断",
+      "i"
+    ],
+    [
+      "^The run failed:\\s*(.*)$",
+      "运行失败：$1",
       ""
     ]
   ],

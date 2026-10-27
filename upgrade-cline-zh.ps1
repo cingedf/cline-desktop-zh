@@ -15,6 +15,11 @@
       源码 tag 与安装版本错位会导致界面报旧版本号。脚本会自动对齐并核验。
     - Cline 正常运行时有两个 code-sidecar.exe（hub-daemon + 桌面后端主进程），
       **不能只取第一个判 PID 变化**，否则会误报崩溃循环。
+    - 【0.0.49 起】桌面后端改为随包的 cline-cli.exe（`run ... desktop-backend\index.js`），
+      code-sidecar.exe 不再被加载；脚本用 `cline-cli.exe --version` 实证判定是否需要补丁。
+    - 【0.0.49 起】wry 0.57 会显式传 WebView2 参数，导致
+      WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS 环境变量被忽略、19333 永不监听。
+      脚本会等长修补 cline-app.exe 内嵌参数串，补上 --remote-debugging-port=19333。
     - 【新增】**必须先关掉 Cline 自动更新**（global-settings.json: autoUpdateEnabled）。
       否则更新可能在脚本中途发生：安装目录 sidecar 变成官方未打补丁版本，
       而 launch-silent.vbs 把 sidecar 钉在 cline-zh\bin，于是 app/sidecar 版本错位；
@@ -195,6 +200,30 @@ function Import-ProxyEnvFromLauncher {
     $script:ProxyBase = $pb
     return $pb
 }
+# 探测代理端点是否真的在监听（默认 2 秒超时）
+# 实测（2026-10-27）：第 0 步注入的 HTTP(S)_PROXY 会被 git 子进程继承。
+# 代理程序没启动时端口无人监听，git fetch 直接报
+# "Failed to connect to 127.0.0.1 port 7897"，而本机直连 GitHub 其实是通的。
+# 所以联网前先探活：代理死了就临时直连，避免整条升级流程被代理卡死。
+function Test-ProxyEndpoint {
+    param([string]$Url, [int]$TimeoutMs = 2000)
+    if (-not $Url) { return $false }
+    try {
+        $u = [Uri]$Url
+        if (-not $u.Host) { return $false }
+        $port = $u.Port
+        if ($port -le 0) {
+            $port = switch ($u.Scheme) { "https" { 443 } "socks5" { 1080 } default { 80 } }
+        }
+        $c = New-Object System.Net.Sockets.TcpClient
+        try {
+            $iar = $c.BeginConnect($u.Host, $port, $null, $null)
+            if (-not $iar.AsyncWaitHandle.WaitOne($TimeoutMs, $false)) { return $false }
+            $c.EndConnect($iar)
+            return $true
+        } finally { $c.Dispose() }
+    } catch { return $false }
+}
 
 # 读取持久化的 connector 配置（~/.cline/data/connectors/*.json）
 # 这里只有 botUsername / botId / pid，**不含 token**；
@@ -299,7 +328,7 @@ Step "0/12 前置检查"
 Clear-StaleGitLocks -Dir $RepoDir
 $appExe = Join-Path $ClineDir "cline-app.exe"
 if (-not (Test-Path $appExe))       { Die "找不到 Cline 安装目录下的 cline-app.exe。请用 -ClineDir 指定安装目录（当前探测值：'$ClineDir'）" }
-if (-not (Test-Path $BunExe))        { Die "找不到 Bun（编译补丁版 sidecar 必需）。请安装 Bun 或用 -BunExe 指定路径（当前探测值：'$BunExe'）" }
+if (-not (Test-Path $BunExe))        { Warn "未找到 Bun（仅编译补丁版 sidecar 时需要）。请安装 Bun 或用 -BunExe 指定路径（当前探测值：'$BunExe'）" }
 if (-not (Test-Path (Join-Path $RepoDir ".git"))) { Die "找不到官方源码仓库。请先 git clone --depth 1 https://github.com/cline/cline，或用 -RepoDir 指定（当前探测值：'$RepoDir'）" }
 
 # ---- 自动更新守卫 ----
@@ -311,10 +340,10 @@ if (Test-Path $gsPath) {
     try {
         $gs = Get-Content $gsPath -Raw | ConvertFrom-Json
         if ($gs.autoUpdateEnabled -eq $true) {
-            Die "检测到 Cline 自动更新仍处于开启状态（global-settings.json: autoUpdateEnabled=true）。`n" +
+            Die ("检测到 Cline 自动更新仍处于开启状态（global-settings.json: autoUpdateEnabled=true）。`n" +
                 "       请先到 Cline 设置里关闭自动更新，再重跑本脚本。`n" +
                 "       原因：更新可能在脚本中途发生，导致 app / sidecar 版本错位；`n" +
-                "       且官方未打补丁的 Windows sidecar 在本机（无 AVX2）无法运行。"
+                "       且官方未打补丁的 Windows sidecar 在本机（无 AVX2）无法运行。")
         } else {
             Ok "自动更新已关闭（符合预期）"
         }
@@ -342,8 +371,13 @@ if (@($script:SavedConns).Count -gt 0 -and @($script:ActiveBefore).Count -eq 0) 
 
 $version = (Get-Item $appExe).VersionInfo.FileVersion.Trim()
 if (-not $Tag) { $Tag = "desktop-v" + $version }
-$bunVer = (Invoke-Native -FilePath $BunExe -Arguments @("--version") -Capture).Output.Trim()
-Say "安装版本 = $version，目标 tag = $Tag，Bun = $bunVer"
+# 0.0.49 起桌面后端由 code-sidecar.exe 改为随包的 cline-cli.exe
+# （tauri.conf.json externalBin=bin/cline-cli；main.rs 以 `cline-cli run ... desktop-backend\index.js` 启动）。
+# 用文件是否存在判断，比版本号可靠。
+$cliExe = Join-Path $ClineDir "cline-cli.exe"
+$backendKind = if (Test-Path $cliExe) { "cline-cli" } else { "code-sidecar" }
+$bunVer = if (Test-Path $BunExe) { (Invoke-Native -FilePath $BunExe -Arguments @("--version") -Capture).Output.Trim() } else { "" }
+Say "安装版本 = $version，后端 = $backendKind，目标 tag = $Tag，Bun = $bunVer"
 
 # ---- 固定副本是否落后于当前 app ----
 # sidecar 的 FileVersion 是 bun 版本（1.4.x），跟 app 版本无关，
@@ -372,7 +406,9 @@ if (Test-Path $mfPath) {
 # 而启动器只钉固定副本 —— 两侧从此分叉，且没有任何提示。
 $sidecarInst = Join-Path $ClineDir "code-sidecar.exe"
 $sidecarPin  = Join-Path $PinnedDir  "code-sidecar.exe"
-if ((Test-Path $sidecarInst) -and (Test-Path $sidecarPin)) {
+if ($backendKind -eq "cline-cli") {
+    Say "后端已改为 cline-cli.exe：安装目录/固定副本里的 code-sidecar.exe 不再参与运行，跳过两侧一致性检查"
+} elseif ((Test-Path $sidecarInst) -and (Test-Path $sidecarPin)) {
     $hI = (Get-FileHash $sidecarInst -Algorithm SHA256).Hash
     $hP = (Get-FileHash $sidecarPin  -Algorithm SHA256).Hash
     if ($hI -eq $hP) {
@@ -405,38 +441,82 @@ try {
     }
 } catch { Warn "AVX2 检测异常，按需要补丁处理" }
 
+# 实证优先于理论：0.0.49 的后端是随包的 cline-cli.exe，只要它自己能跑，
+# 就不存在 AVX2 补丁问题，也不需要编译任何 sidecar（源码考证只对 code-sidecar 时代有意义）。
+$backendVerified = $false
+if ($backendKind -eq "cline-cli") {
+    $cliProbe = Invoke-Native -FilePath $cliExe -Arguments @("--version") -Capture
+    if ($cliProbe.ExitCode -eq 0) {
+        $needPatch = $false
+        $backendVerified = $true
+        Ok ("官方后端 cline-cli.exe 可直接运行（--version -> {0}），本机无需补丁" -f $cliProbe.Output.Trim())
+    } else {
+        Warn "cline-cli.exe --version 退出码 $($cliProbe.ExitCode)：官方后端可能无法运行"
+    }
+}
+
 # ---------- 2. 考证官方是否已修（仅在不需要补丁时才跳过） ----------
 Step "2/12 考证官方是否已把 Windows sidecar 改为 baseline 构建"
+
+$proxyForGit = $false
+if ($backendVerified) {
+    Say "后端已实证可运行 -> 跳过源码考证（本次不联网 fetch）"
+} else {
+
+# ---- git 出网方式：先探活代理，代理死了就直连 ----
+# 实测（2026-10-27）：第 0 步注入的 HTTP(S)_PROXY 会被 git 子进程继承；
+# 代理程序没启动（7897 无人监听）时 fetch 直接失败，而本机直连 GitHub 是通的。
+$gitNetArgs    = @()
+$proxyForGit   = $false
+$savedHttpUp   = $env:HTTP_PROXY
+$savedHttpsUp  = $env:HTTPS_PROXY
+$savedHttpLow  = $env:http_proxy
+$savedHttpsLow = $env:https_proxy
+if ($script:ProxyBase) {
+    if (Test-ProxyEndpoint -Url $script:ProxyBase) {
+        $proxyForGit = $true
+        Say "出站代理 $($script:ProxyBase) 可达 -> git 走代理"
+    } else {
+        Warn "出站代理 $($script:ProxyBase) 不可达（端口未监听）-> 本次 git 改直连 GitHub"
+        Warn "  若代理确实已关闭，第 11 步 connector 也无法自动恢复"
+    }
+} else {
+    Say "未配置出站代理 -> git 直连"
+}
+if (-not $proxyForGit) {
+    Remove-Item Env:HTTP_PROXY,Env:HTTPS_PROXY,Env:http_proxy,Env:https_proxy -ErrorAction SilentlyContinue
+    # 再覆盖 git 配置中可能残留的代理（-c 优先级高于配置文件）
+    $gitNetArgs = @("-c", "http.proxy=", "-c", "https.proxy=")
+}
 Push-Location $RepoDir
 try {
     # fetch 的输出必须保留：这是"拉不到 tag"唯一的诊断线索。
-    # 原先 `| Out-Null` 把 fatal: ... 整段吞掉，只剩一句"官方可能改了命名"，
-    # 排查时完全看不出是真网络问题还是本地锁文件。
-    $fetch = Invoke-Native -FilePath "git" -Arguments @("fetch","--depth","1","origin","+refs/tags/$($Tag):refs/tags/$($Tag)") -Capture
+    $fetch = Invoke-Native -FilePath "git" -Arguments (@($gitNetArgs) + @("fetch","--depth","1","origin","+refs/tags/$($Tag):refs/tags/$($Tag)")) -Capture
     if ($fetch.ExitCode -ne 0) {
         Say "git fetch 原始输出："
         Write-Host ($fetch.Output.Trim()) -ForegroundColor DarkGray
-        Die ("从 GitHub 拉取 tag $Tag 失败（git exit={0}）。常见原因与对策：" -f $fetch.ExitCode) +
-            "`n       - 报 File exists / Unable to create .git\*.lock -> 残留锁，删掉对应锁文件后重跑" +
-            "`n       - 报 unable to access / Connection timed out   -> 代理不通，检查 git config http.proxy（本机应为 127.0.0.1:7897）" +
-            "`n       - 报 could not resolve host                    -> DNS/网络问题"
+        Die (("从 GitHub 拉取 tag $Tag 失败（git exit={0}）。常见原因与对策：" -f $fetch.ExitCode) +
+             "`n       - 报 File exists / Unable to create .git\*.lock -> 残留锁，删掉对应锁文件后重跑" +
+             "`n       - 报 unable to access / Connection timed out   -> 代理与直连都不通，检查网络或启动代理后重跑" +
+             "`n       - 报 could not resolve host                    -> DNS/网络问题")
     }
     $rcTag = Invoke-Native -FilePath "git" -Arguments @("rev-parse","--verify","--quiet","refs/tags/$($Tag)")
     if ($rcTag -ne 0) {
         # 已 fetch 成功却仍找不到 tag，才是真正的"官方改了命名"
         Warn "已成功联网 fetch，但仓库中仍没有 tag $Tag（官方可能改了命名）；仍会尝试用当前工作区构建"
     } else {
-        $cur = Invoke-Native -FilePath "git" -Arguments @("show","$($Tag):apps/examples/desktop-app/scripts/build-sidecar-bin.ts") -Capture
-        if ($cur.ExitCode -ne 0) {
-            Warn "已拉到 tag $Tag，但读不出 build-sidecar-bin.ts（exit=$($cur.ExitCode)）；路径可能变了，按需要补丁处理"
-            $winLine = $null
-        } else {
-            # Invoke-Native -Capture 返回的是整个文件的多行文本。
-            # 直接喂给 Select-String，它会把整份文件当成「一行」，
-            # 于是 $winLine.ToString() 吐出整个 build-sidecar-bin.ts（几百行刷屏）。
-            # 必须先按行切开再匹配。
+        # 官方在 0.0.49 把 sidecar 构建脚本改了名（build-sidecar-bin.ts -> build-desktop-runtime.ts）。
+        # 按候选路径依次查找，避免路径变更后被误判为"官方已修 AVX2"或"未定位"。
+        $winLine = $null
+        foreach ($rel in @(
+            "apps/examples/desktop-app/scripts/build-sidecar-bin.ts",
+            "apps/examples/desktop-app/scripts/build-desktop-runtime.ts"
+        )) {
+            $cur = Invoke-Native -FilePath "git" -Arguments @("show","$($Tag):$rel") -Capture
+            if ($cur.ExitCode -ne 0) { continue }
             $curLines = $cur.Output -split "`r?`n"
-            $winLine = ($curLines | Select-String -Pattern 'x86_64-pc-windows' | Select-Object -First 1)
+            $hit = ($curLines | Select-String -Pattern 'x86_64-pc-windows' | Select-Object -First 1)
+            if ($hit) { $winLine = $hit; break }
         }
         if ($winLine -and $winLine.ToString() -match 'bun-windows-x64-baseline') {
             Ok "官方该版本 Windows sidecar 已用 baseline 构建 -> 本机无需补丁"
@@ -445,10 +525,27 @@ try {
             Say "官方该版本 Windows sidecar 仍为标准构建（bun-windows-x64）-> 需要补丁"
             Say ("  " + $winLine.ToString().Trim())
         } else {
-            Warn "未能在 $Tag 的 build-sidecar-bin.ts 中定位 Windows 分支，按需要补丁处理"
+            Warn "未能在 $Tag 的已知构建脚本中定位 Windows 分支，按需要补丁处理"
         }
     }
-} finally { Pop-Location }
+} finally {
+    Pop-Location
+    # 代理不可达时保持"直连"状态：后续 bun install / 构建同样需要出网，
+    # 恢复死代理会让它们全部失败（实测 bun install 报 Failed to install N packages）。
+    if ($proxyForGit) {
+        $env:HTTP_PROXY  = $savedHttpUp
+        $env:HTTPS_PROXY = $savedHttpsUp
+        $env:http_proxy  = $savedHttpLow
+        $env:https_proxy = $savedHttpsLow
+    }
+}
+}   # end if (-not $backendVerified)
+
+if ($needPatch -and $backendKind -eq "cline-cli") {
+    Die ("0.0.49 的后端是 cline-cli.exe（已不再加载 code-sidecar.exe），但 --version 探测失败。`n" +
+         "       本脚本不会为它编译 code-sidecar 补丁（编了也不会被加载）。`n" +
+         "       请先确认安装包完整，或检查 cline-cli.exe 是否被安全软件拦截。")
+}
 
 if (-not $needPatch) {
     Warn "按考证结果跳过 sidecar 编译（-ForcePatch 可强制编译）"
@@ -458,8 +555,62 @@ if ($ForcePatch) {
     $needPatch = $true
 }
 
+# ---------- WebView2 CDP 端口修补 ----------
+# 2026-10-27 实测：0.0.49 内嵌 wry 0.57，创建 WebView2 时显式传入
+#   --disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection
+#   --autoplay-policy=no-user-gesture-required
+#   --proxy-server=http:// --proxy-server=socks5://
+# WebView2 一旦收到 app 传入的 AdditionalBrowserArguments，就会**忽略**
+# WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS 环境变量（实测：直连启动 + 环境变量，
+# 浏览器命令行仍无 --remote-debugging-port，19333 无监听）。
+# 所以只能在 cline-app.exe 的内嵌字符串里等长补上调试端口。
+# 必须等长：Rust &str 的长度是编译期常量，改长度会读到相邻数据。
+function Test-AppCdpPatched {
+    param([string]$Path, [int]$Port = 19333)
+    try {
+        $fs = [System.IO.File]::Open($Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+        try {
+            $buf = [byte[]]::new([int]$fs.Length)
+            $null = $fs.Read($buf, 0, $buf.Length)
+        } finally { $fs.Dispose() }
+        $s = [System.Text.Encoding]::ASCII.GetString($buf)
+        return $s.Contains("--remote-debugging-port=$Port")
+    } catch { return $false }
+}
+
+function Set-AppCdpPatch {
+    param([string]$Path, [string]$Version = "unknown", [int]$Port = 19333)
+    try {
+        $head = "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection"
+        $tail = " --proxy-server=http://"
+        $bytes = [System.IO.File]::ReadAllBytes($Path)
+        $s = [System.Text.Encoding]::ASCII.GetString($bytes)
+        $i = $s.IndexOf($head)
+        if ($i -lt 0) { return @{ Ok = $false; Error = "未找到 wry 默认参数字符串（官方可能升级了 wry，请更新本脚本的锚点）" } }
+        $j = $s.IndexOf($tail, $i)
+        if ($j -lt 0) { return @{ Ok = $false; Error = "未找到 proxy-server 段，无法确定可替换长度" } }
+        $headLen = $j - $i
+        $newHead = "$head --remote-debugging-port=$Port"
+        if ($newHead.Length -gt $headLen) { return @{ Ok = $false; Error = "新参数过长（$($newHead.Length) > $headLen）" } }
+        $newHead = $newHead.PadRight($headLen)
+        $sha8 = (Get-FileHash $Path -Algorithm SHA256).Hash.Substring(0,8)
+        $bak = "$Path.bak-$Version-$sha8"
+        if (-not (Test-Path $bak)) { [System.IO.File]::Copy($Path, $bak, $false) }
+        $nb = [System.Text.Encoding]::ASCII.GetBytes($newHead)
+        $diff = 0
+        for ($k = 0; $k -lt $headLen; $k++) { if ($bytes[$i + $k] -ne $nb[$k]) { $diff++ } }
+        [Array]::Copy($nb, 0, $bytes, $i, $headLen)
+        [System.IO.File]::WriteAllBytes($Path, $bytes)
+        if (-not (Test-AppCdpPatched -Path $Path -Port $Port)) { return @{ Ok = $false; Error = "写入后校验失败" } }
+        return @{ Ok = $true; Backup = $bak; Replaced = $diff }
+    } catch {
+        return @{ Ok = $false; Error = $_.Exception.Message }
+    }
+}
+
 # ---------- 3. 检出对应 tag ----------
 if ($needPatch) {
+if (-not (Test-Path $BunExe)) { Die "需要编译补丁版 sidecar，但未找到 Bun。请安装 Bun 或用 -BunExe 指定路径。" }
 Step "3/12 检出源码 tag $Tag"
 Push-Location $RepoDir
 try {
@@ -495,8 +646,12 @@ $env:BUILD_MODE = "package"
 $env:PATH = (Split-Path $BunExe) + ";" + $env:PATH
 Push-Location $RepoDir
 try {
-    $rcInstall = Invoke-Native -FilePath $BunExe -Arguments @("install") -Tail
-    if ($rcInstall -ne 0) { Die "bun install 失败（exit=$rcInstall）" }
+    $rInstall = Invoke-Native -FilePath $BunExe -Arguments @("install") -Capture
+    if ($rInstall.ExitCode -ne 0) {
+        Say "bun install 原始输出（最后 15 行）："
+        Write-Host (@($rInstall.Output -split "`r?`n" | Where-Object { $_.Trim() } | Select-Object -Last 15) -join "`n") -ForegroundColor DarkGray
+        Die "bun install 失败（exit=$($rInstall.ExitCode)）"
+    }
 } catch { Pop-Location; Die $_.Exception.Message }
 Pop-Location
 Ok "依赖安装完成"
@@ -553,7 +708,7 @@ function Stop-ClineTree {
     $round = 0
     while ((Get-Date) -lt $deadline) {
         $round++
-        $procs = @(Get-Process -Name cline-app, code-sidecar -ErrorAction SilentlyContinue)
+        $procs = @(Get-Process -Name cline-app, code-sidecar, cline-cli -ErrorAction SilentlyContinue)
         if ($procs.Count -eq 0) { return @{ Cleared = $true; Rounds = $round } }
         foreach ($p in $procs) {
             Say ("仍在运行 {0} pid={1}，强制结束（第 {2} 轮）" -f $p.ProcessName, $p.Id, $round)
@@ -561,7 +716,7 @@ function Stop-ClineTree {
         }
         Start-Sleep -Seconds 2
     }
-    $left = @(Get-Process -Name cline-app, code-sidecar -ErrorAction SilentlyContinue)
+    $left = @(Get-Process -Name cline-app, code-sidecar, cline-cli -ErrorAction SilentlyContinue)
     return @{ Cleared = ($left.Count -eq 0); Rounds = $round; Remaining = $left }
 }
 
@@ -664,10 +819,7 @@ if ($PinnedDir) {
 }
 
 if ($PinnedDir) {
-    [System.IO.Directory]::CreateDirectory($PinnedDir) | Out-Null
     $pinned = Join-Path $PinnedDir "code-sidecar.exe"
-    [System.IO.File]::Copy($repoSidecar, $pinned, $true)
-    Ok "已更新固定副本 $pinned"
 
     # 写构建清单：把「这份补丁版到底对应哪个 app 版本」变成机器可读的事实。
     # 起因：sidecar 的 FileVersion 是 bun 版本（1.4.x），与 app 版本无关，
@@ -690,8 +842,25 @@ if ($PinnedDir) {
 }
 }
 
-# ---------- 8. 通过中文版启动器重启 ----------
-Step "8/12 通过中文版启动器重启（含调试端口 + 汉化注入）"
+# ---------- 8. 补齐调试端口 / 通过中文版启动器重启 ----------
+Step "8/12 补齐 WebView2 调试端口并通过中文版启动器重启"
+if (Test-AppCdpPatched -Path $appExe) {
+    Ok "cline-app.exe 已含 --remote-debugging-port=19333（CDP 可用，注入器能连上）"
+} else {
+    Say "cline-app.exe 尚未包含调试端口 -> 关闭 Cline 后等长修补内嵌浏览器参数"
+    # 注入器 / connector 也要停：旧进程没有调试端口，留着只会空转
+    Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -like "*inject.js*" -or $_.CommandLine -match 'connect\s+(telegram|slack|discord|gchat|whatsapp|linear)' } |
+        ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    $killCdp = Stop-ClineTree
+    if (-not $killCdp.Cleared) {
+        $names = ($killCdp.Remaining | ForEach-Object { "$($_.ProcessName)/$($_.Id)" }) -join ", "
+        Die "无法关闭以下进程，exe 被占用无法修补：$names`n       请手动结束后重跑本脚本。"
+    }
+    $rPatch = Set-AppCdpPatch -Path $appExe -Version $version
+    if (-not $rPatch.Ok) { Die ("修补 cline-app.exe 失败：{0}" -f $rPatch.Error) }
+    Ok ("已修补 cline-app.exe（备份 $(Split-Path $rPatch.Backup -Leaf)，变更 $($rPatch.Replaced) 字节）")
+}
 if (Test-Path $Launcher) {
     Start-Process "wscript.exe" -ArgumentList ('"' + $Launcher + '"') -WindowStyle Hidden
     Ok "已通过 launch-silent.vbs 启动"
@@ -701,21 +870,24 @@ if (Test-Path $Launcher) {
 }
 
 # ---------- 9. 验证 sidecar 存活 / 无崩溃循环 ----------
-Step "9/12 验证：sidecar 存活 / 端口监听 / 无崩溃循环"
+Step "9/12 验证：后端存活 / 端口监听 / 无崩溃循环"
+$backendProcName = if ($backendKind -eq "cline-cli") { "cline-cli.exe" } else { "code-sidecar.exe" }
 $deadline = (Get-Date).AddSeconds(90)
 $mainPid = $null
+$backendPort = $null
 while ((Get-Date) -lt $deadline) {
     Start-Sleep -Seconds 3
-    $side = @(Get-CimInstance Win32_Process -Filter "Name='code-sidecar.exe'" -ErrorAction SilentlyContinue)
+    $side = @(Get-CimInstance Win32_Process -Filter ("Name='{0}'" -f $backendProcName) -ErrorAction SilentlyContinue)
     if ($side.Count -eq 0) { continue }
-    # 桌面后端主进程 = 命令行里没有 --cline-hub-daemon 的那个（正常运行有两个 sidecar）
+    # 桌面后端主进程 = 命令行里没有 --cline-hub-daemon 的那个
+    # （code-sidecar 时代有两个 sidecar；cline-cli 时代是 hub + `run ... desktop-backend`）
     $main = $side | Where-Object { $_.CommandLine -notlike '*--cline-hub-daemon*' } | Select-Object -First 1
-    if (-not $main) { $main = $side | Select-Object -First 1 }
+    if (-not $main) { continue }
     $listen = Get-NetTCPConnection -State Listen -OwningProcess $main.ProcessId -ErrorAction SilentlyContinue
-    if ($listen) { $mainPid = $main.ProcessId; break }
+    if ($listen) { $mainPid = $main.ProcessId; $backendPort = ($listen | Select-Object -First 1).LocalPort; break }
 }
-if (-not $mainPid) { Die "90 秒内未检测到 sidecar 监听端口" }
-Ok "sidecar 主进程运行中（PID $mainPid）"
+if (-not $mainPid) { Die ("90 秒内未检测到 {0} 后端监听端口（0.0.49 后端应为 cline-cli.exe run ... desktop-backend\index.js）" -f $backendProcName) }
+Ok "后端主进程运行中（$backendProcName，PID $mainPid，监听端口 $backendPort）"
 
 $start1 = (Get-Process -Id $mainPid).StartTime
 Say "稳定性观察 30 秒（检测崩溃循环）..."
@@ -777,7 +949,7 @@ if (@($script:SavedConns).Count -eq 0) {
     }
     if (@($restored).Count -gt 0) {
         foreach ($c in $restored) { Ok "connector 已自动恢复：$($c.Channel) / $($c.Bot) (pid=$($c.Pid))" }
-        if ($script:ProxyBase) { Ok "恢复的 connector 继承了代理 $script:ProxyBase" }
+        if ($script:ProxyBase -and $proxyForGit) { Ok "恢复的 connector 继承了代理 $script:ProxyBase" }
     } else {
         Warn "60 秒内 connector 未自动恢复"
         $cmd = Get-ClineCmd
