@@ -365,7 +365,15 @@ if (Test-Path $gsPath) {
 
 # ---- 代理环境：从启动器导入，供本脚本后续拉起 connector 使用 ----
 $pb = Import-ProxyEnvFromLauncher -LauncherPath $Launcher
-if ($pb) { Ok "已从启动器/本地覆盖文件载入出站代理：$pb" }
+if ($pb) {
+    if (Test-ProxyEndpoint -Url $pb) {
+        Ok "已从启动器/本地覆盖文件载入出站代理：$pb"
+    } else {
+        Warn "代理 $pb 未监听 -> 本次不注入（否则更新检查 / Cline Account 会失败）"
+        Remove-Item Env:HTTP_PROXY, Env:HTTPS_PROXY, Env:NO_PROXY -ErrorAction SilentlyContinue
+        $script:ProxyBase = ""
+    }
+}
 else { Warn "未能从 launch-silent.vbs 解析代理；若 connector 需出网，自动恢复可能失败" }
 
 # ---- connector 快照（升级前它们在跑，升级过程会打断）----

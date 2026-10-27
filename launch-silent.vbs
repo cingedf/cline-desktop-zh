@@ -2,6 +2,26 @@
 Set WshShell = CreateObject("WScript.Shell")
 Set FSO = CreateObject("Scripting.FileSystemObject")
 
+' Probe the local proxy before injecting it into child processes.
+' cline-cli (reqwest) honors HTTP_PROXY/HTTPS_PROXY, so a closed proxy makes
+' update checks and the Cline Account page fail with "error sending request".
+' Verified 2026-10-28: injecting a dead 127.0.0.1:7897 reproduces it exactly.
+Function ProxyAlive(url)
+    ProxyAlive = False
+    On Error Resume Next
+    Dim req
+    Set req = CreateObject("WinHttp.WinHttpRequest.5.1")
+    If Err.Number <> 0 Then Exit Function
+    req.SetProxy 1, ""          ' query directly, ignore system proxy
+    req.SetTimeouts 700, 700, 700, 1200
+    req.Open "GET", url, False
+    Err.Clear
+    req.Send
+    If Err.Number = 0 Then ProxyAlive = True
+    Err.Clear
+    On Error GoTo 0
+End Function
+
 ' 自动推导路径：优先当前脚本所在目录的上级目录
 zhDir = FSO.GetParentFolderName(WScript.ScriptFullName)
 appDir = FSO.GetParentFolderName(zhDir)
@@ -77,12 +97,14 @@ If needsLaunch Then
         ExecuteGlobal FSO.OpenTextFile(localCfg, 1).ReadAll()
     End If
     If proxyBase <> "" Then
-        procEnv("HTTP_PROXY") = proxyBase
-        procEnv("http_proxy") = proxyBase
-        procEnv("HTTPS_PROXY") = proxyBase
-        procEnv("https_proxy") = proxyBase
-        procEnv("NO_PROXY") = "127.0.0.1,localhost,::1"
-        procEnv("no_proxy") = "127.0.0.1,localhost,::1"
+        If ProxyAlive(proxyBase) Then
+            procEnv("HTTP_PROXY") = proxyBase
+            procEnv("http_proxy") = proxyBase
+            procEnv("HTTPS_PROXY") = proxyBase
+            procEnv("https_proxy") = proxyBase
+            procEnv("NO_PROXY") = "127.0.0.1,localhost,::1"
+            procEnv("no_proxy") = "127.0.0.1,localhost,::1"
+        End If
     End If
     
     sidecarPin = zhDir & "\bin\code-sidecar.exe"
